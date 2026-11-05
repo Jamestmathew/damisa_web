@@ -1,3 +1,4 @@
+import { DataBarChart } from "@/shared/charts/bar-chart";
 import type { Metadata } from "next";
 
 import { requireAuth } from "@/modules/auth/lib/route-guard";
@@ -28,6 +29,15 @@ export default async function TutorDashboardPage() {
       <TutorStatsGrid stats={data.stats} />
 
       <MyCoursesOverview courses={data.myCourses} />
+      <DataBarChart
+        title="Quiz performance"
+        description="Average submitted-attempt scores for your quizzes"
+        format="percent"
+        tone="orange"
+        points={data.quizStats
+          .filter((q) => q.attemptCount > 0)
+          .map((q) => ({ label: q.quizTitle, value: q.averageScorePercent }))}
+      />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
         <UpcomingClasses classes={data.upcomingClasses} />

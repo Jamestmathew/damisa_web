@@ -1,5 +1,5 @@
+import { BrandLogo } from "@/shared/brand/logo";
 import { CurrentUserAvatar } from "@/shared/account/current-user-avatar";
-import Link from "next/link";
 import { LogOut } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,9 @@ export function RoleHeader({
           brandLabel={brandLabel}
           brandIcon={brandIcon}
         />
+        <span className="md:hidden">
+          <BrandLogo size={30} />
+        </span>
         <Breadcrumbs items={navItems} homeHref={homeHref} />
       </div>
 
@@ -48,12 +51,6 @@ export function RoleHeader({
 
         <CurrentUserAvatar name={userName} />
 
-        <Link
-          className="text-xs text-primary hover:underline"
-          href="/settings/change-password"
-        >
-          Change password
-        </Link>
         <form action={logoutAction}>
           <Button
             type="submit"

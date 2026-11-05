@@ -1,8 +1,15 @@
+import { OfficesDashboard } from "@/modules/super-admin/features/offices/components/offices-dashboard";
 import type { Metadata } from "next";
 
 import { requireAuth } from "@/modules/auth/lib/route-guard";
-import { getSuperAdminDashboardData, SuperAdminStatsGrid } from "@/modules/super-admin/features/dashboard";
-import { getOffices, OfficesOverviewTable } from "@/modules/super-admin/features/offices";
+import {
+  getSuperAdminDashboardData,
+  SuperAdminStatsGrid,
+} from "@/modules/super-admin/features/dashboard";
+import {
+  getOffices,
+  OfficesOverviewTable,
+} from "@/modules/super-admin/features/offices";
 import { PageHeader } from "@/shared/components";
 
 export const metadata: Metadata = { title: "Super Admin Dashboard" };
@@ -16,10 +23,16 @@ export default async function SuperAdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={`Welcome back, ${data.founderFirstName}`} description="Platform-wide oversight" />
+      <PageHeader
+        title={`Welcome back, ${data.founderFirstName}`}
+        description="Platform-wide oversight"
+      />
       <SuperAdminStatsGrid stats={data.stats} />
+      <OfficesDashboard offices={offices} showSummary={false} />
       <div>
-        <h2 className="mb-3 text-base font-semibold text-foreground">Offices</h2>
+        <h2 className="mb-3 text-base font-semibold text-foreground">
+          Offices
+        </h2>
         <OfficesOverviewTable offices={offices} />
       </div>
     </div>

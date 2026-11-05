@@ -1,3 +1,4 @@
+import { getSessionState } from "@/shared/security/session";
 import type { Metadata } from "next";
 
 import { getOptionalSession } from "@/modules/auth/lib/route-guard";
@@ -10,7 +11,9 @@ export const metadata: Metadata = {
     default: "SMI Learning Portal",
     template: "%s | SMI Learning Portal",
   },
-  description: "Learning, classes, and academic administration",
+  description:
+    "School of Management and Innovation — learning, classes, and academic administration",
+  icons: { icon: "/brand/smi-logo.jpeg", apple: "/brand/smi-logo.jpeg" },
 };
 
 export default async function RootLayout({
@@ -20,11 +23,14 @@ export default async function RootLayout({
 }) {
   const session = await getOptionalSession();
   const user = session;
+  const sessionState = user ? await getSessionState(user.id) : null;
 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
-        <SessionProvider user={user}>{children}</SessionProvider>
+        <SessionProvider user={user} sessionState={sessionState}>
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );

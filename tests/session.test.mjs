@@ -4,7 +4,7 @@ import { registerHooks } from "node:module";
 import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
-import { SignJWT } from "jose";
+import { decodeJwt, SignJWT } from "jose";
 const jar = new Map();
 globalThis.__sessionJar = {
   get: (key) => jar.get(key),
@@ -61,7 +61,7 @@ test("signed sessions bind the user and revocation version", async () => {
 test("remember-me sets a bounded persistent cookie", async () => {
   jar.clear();
   await setSessionBoundary("user-1", true);
-  assert.equal(jar.get("lms_session").options.maxAge, 30 * 24 * 60 * 60);
+  assert.equal(jar.get("lms_session").options.maxAge, 24 * 60 * 60);
 });
 test("recovery cookies cannot authorize ordinary sessions", async () => {
   jar.clear();
@@ -109,4 +109,76 @@ test("request caches are isolated between requests and can be invalidated", asyn
   await clearRequestCache();
   assert.equal((await read("same")).count, 3);
   globalThis.__sessionJar = original;
+});
+
+test("normal sessions require a signed ten-minute idle proof", async () => {
+  jar.clear();
+  await setSessionBoundary("idle-user", false, false, 7);
+  const { payload } = await import("jose").then(async ({ jwtVerify }) =>
+    jwtVerify(
+      jar.get("lms_idle").value,
+      new TextEncoder().encode(process.env.SESSION_SECRET),
+      { audience: "idle", issuer: "damisa-lms" },
+    ),
+  );
+  assert.ok(payload.exp - Math.floor(Date.now() / 1000) <= 600);
+  assert.equal(payload.version, 7);
+  assert.equal(jar.get("lms_idle").options.httpOnly, true);
+  jar.delete("lms_idle");
+  assert.equal(await validSessionBoundary("idle-user", false, 7), false);
+});
+test("expired idle proof cannot be renewed even if the full session is still valid", async () => {
+  jar.clear();
+  await setSessionBoundary("idle-user", false, false, 7);
+  const main = decodeJwt(jar.get("lms_session").value);
+  jar.set("lms_idle", {
+    value: await new SignJWT({ purpose: "idle", sid: main.jti, version: 7 })
+      .setProtectedHeader({ alg: "HS256" })
+      .setSubject("idle-user")
+      .setIssuer("damisa-lms")
+      .setAudience("idle")
+      .setExpirationTime(Math.floor(Date.now() / 1000) - 1)
+      .sign(new TextEncoder().encode(process.env.SESSION_SECRET)),
+  });
+  assert.equal(await validSessionBoundary("idle-user", false, 7), false);
+  const { renewIdleSession } = await import(
+    "../src/shared/security/session.ts"
+  );
+  assert.equal(await renewIdleSession("idle-user", main.jti), null);
+});
+test("idle proofs cannot be borrowed from another login or account", async () => {
+  jar.clear();
+  await setSessionBoundary("first-user");
+  const first = jar.get("lms_idle");
+  await setSessionBoundary("other-user");
+  jar.set("lms_idle", first);
+  assert.equal(await validSessionBoundary("other-user"), false);
+  await setSessionBoundary("first-user");
+  jar.set("lms_idle", first);
+  assert.equal(await validSessionBoundary("first-user"), false);
+});
+test("remembered sessions persist for exactly 24 hours without an idle-cookie requirement", async () => {
+  jar.clear();
+  await setSessionBoundary("remember-user", true, false, 2);
+  const claims = decodeJwt(jar.get("lms_session").value);
+  assert.equal(claims.remember, true);
+  assert.equal(claims.exp - claims.iat, 86400);
+  assert.equal(jar.get("lms_session").options.maxAge, 86400);
+  assert.equal(jar.has("lms_idle"), false);
+  assert.equal(await validSessionBoundary("remember-user", false, 2), true);
+  assert.equal(await validSessionBoundary("remember-user", false, 3), false);
+});
+test("activity renewal keeps the absolute session and login identity unchanged", async () => {
+  jar.clear();
+  await setSessionBoundary("idle-user");
+  const original = jar.get("lms_session").value;
+  const claims = decodeJwt(original);
+  const { renewIdleSession } = await import(
+    "../src/shared/security/session.ts"
+  );
+  assert.equal(await renewIdleSession("idle-user", "wrong-login"), null);
+  const renewed = await renewIdleSession("idle-user", claims.jti);
+  assert.ok(renewed);
+  assert.equal(renewed.id, claims.jti);
+  assert.equal(jar.get("lms_session").value, original);
 });

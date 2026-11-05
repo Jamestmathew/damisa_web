@@ -1,4 +1,5 @@
 import "server-only";
+import { sessionSigningKey } from "@/shared/security/session-config";
 import { cacheRequest as cache } from "@/shared/security/request-cache";
 
 import type { AuthResult, AuthUser, LoginPayload } from "@/modules/auth/types";
@@ -59,6 +60,8 @@ function mapProfileToAuthUser(
 
 export const supabaseAuthService: AuthServiceContract = {
   async login(payload: LoginPayload): Promise<AuthResult<{ user: AuthUser }>> {
+    // Fail before password authentication if this deployment cannot create a session.
+    sessionSigningKey(process.env.SESSION_SECRET);
     const supabase = await createClient();
 
     const identifier = payload.identifier.trim();

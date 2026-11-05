@@ -35,4 +35,9 @@ export const superAdminNavConfig: RoleNavItem[] = [
     href: SUPER_ADMIN_ROUTES.policies,
     icon: "sparkles",
   },
+  {
+    label: "Change password",
+    href: "/settings/change-password",
+    icon: "shield",
+  },
 ];

@@ -47,6 +47,7 @@ export function LoginForm() {
 
       const result = await loginAction(null, formData);
       setState(result);
+      if (!result?.ok) sessionStorage.removeItem("damisa.login.pending");
 
       if (!result?.ok && result?.fieldErrors) {
         for (const [field, message] of Object.entries(result.fieldErrors)) {
@@ -65,7 +66,12 @@ export function LoginForm() {
       ) : null}
 
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={(event) => {
+          void form.handleSubmit((values) => {
+            sessionStorage.setItem("damisa.login.pending", String(Date.now()));
+            onSubmit(values);
+          })(event);
+        }}
         className="space-y-4"
         noValidate
       >

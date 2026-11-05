@@ -1,3 +1,4 @@
+import { sessionSigningKey } from "../src/shared/security/session-config.ts";
 import { existsSync } from "node:fs";
 for (const file of [".env.local", ".env"])
   if (existsSync(file)) process.loadEnvFile(file);
@@ -14,8 +15,10 @@ if (missing.length) {
   console.error("Missing environment variables:", missing.join(", "));
   process.exit(1);
 }
-if (process.env.SESSION_SECRET.length < 32) {
-  console.error("SESSION_SECRET must have at least 32 characters.");
+try {
+  sessionSigningKey(process.env.SESSION_SECRET);
+} catch (error) {
+  console.error(error.message);
   process.exit(1);
 }
 for (const name of ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SITE_URL"]) {

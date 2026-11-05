@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/shared/brand/logo";
 import { CurrentUserAvatar } from "@/shared/account/current-user-avatar";
 import { LogOut } from "lucide-react";
 
@@ -20,6 +21,9 @@ export function StudentHeader({
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b border-border bg-background/95 px-4 backdrop-blur">
       <div className="flex items-center gap-2">
         <StudentMobileNav />
+        <span className="md:hidden">
+          <BrandLogo size={30} />
+        </span>
         <StudentBreadcrumbs />
       </div>
 

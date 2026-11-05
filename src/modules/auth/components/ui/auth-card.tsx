@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/shared/brand/logo";
 import type { ReactNode } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,8 +16,23 @@ interface AuthCardProps {
  */
 export function AuthCard({ children, className }: AuthCardProps) {
   return (
-    <Card className={cn("w-full max-w-md shadow-md", className)}>
-      <CardContent className="p-6 sm:p-8">{children}</CardContent>
+    <Card
+      className={cn(
+        "auth-brand-card w-full max-w-md rounded-2xl shadow-2xl",
+        className,
+      )}
+    >
+      <CardContent className="p-6 sm:p-8">
+        <div className="mb-6 flex flex-col items-center gap-3">
+          <BrandLogo size={88} />
+          <p className="text-center text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            School of Management
+            <br />
+            and Innovation
+          </p>
+        </div>
+        {children}
+      </CardContent>
     </Card>
   );
 }

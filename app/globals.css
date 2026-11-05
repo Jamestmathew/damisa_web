@@ -4,25 +4,27 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --brand-navy: 218 69% 14%;
+    --brand-orange: 34 100% 56%;
+    --background: 216 33% 98%;
+    --foreground: 218 60% 15%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 218 69% 14%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 34 100% 94%;
+    --accent-foreground: 218 69% 14%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --success: 142 71% 45%;
     --success-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 34 100% 56%;
     --radius: 0.625rem;
   }
 
@@ -31,8 +33,8 @@
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 34 100% 56%;
+    --primary-foreground: 218 69% 14%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
@@ -55,5 +57,48 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .brand-sidebar {
+    --background: 218 69% 14%;
+    --card: 218 69% 14%;
+    --foreground: 210 40% 98%;
+    --muted-foreground: 215 25% 78%;
+    --primary: 34 100% 56%;
+    --primary-foreground: 218 69% 14%;
+    --secondary: 218 48% 24%;
+    --secondary-foreground: 34 100% 65%;
+    --accent: 218 48% 22%;
+    --accent-foreground: 0 0% 100%;
+    --border: 218 38% 28%;
+    background: hsl(var(--brand-navy));
+    color: hsl(var(--foreground));
+  }
+  .brand-sidebar a[aria-current="page"] {
+    box-shadow: inset 3px 0 hsl(var(--brand-orange));
+  }
+  .auth-backdrop {
+    background:
+      radial-gradient(
+        ellipse at 18% 15%,
+        hsl(34 100% 56% / 0.17),
+        transparent 42%
+      ),
+      radial-gradient(
+        ellipse at 85% 90%,
+        hsl(217 65% 40% / 0.45),
+        transparent 45%
+      ),
+      hsl(var(--brand-navy));
+  }
+  .auth-brand-card {
+    border-top: 4px solid hsl(var(--brand-orange));
+  }
+  .auth-brand-card button[type="submit"] {
+    background: hsl(var(--brand-orange));
+    color: hsl(var(--brand-navy));
+    font-weight: 700;
   }
 }

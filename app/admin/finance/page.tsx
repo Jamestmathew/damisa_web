@@ -1,3 +1,5 @@
+import { DataBarChart } from "@/shared/charts/bar-chart";
+import { monthOf, recentMonths } from "@/shared/charts/monthly";
 import { getOfficePeople } from "@/shared/data/people";
 import { listRecords } from "@/shared/data/records";
 import type { StudentFee } from "@/shared/data/balance";
@@ -30,6 +32,24 @@ export default async function FinancePage() {
         title="Finance"
         description="Manually record and review each company’s earnings"
       />
+      <div className="mb-6">
+        <DataBarChart
+          title="Monthly recorded income"
+          description="Confirmed manual income over the last six months, by date earned"
+          format="naira"
+          tone="orange"
+          points={recentMonths().map((month) => ({
+            label: month.label,
+            value: payments
+              .filter(
+                (payment) =>
+                  payment.status === "paid" &&
+                  monthOf(payment.earnedOn ?? payment.recordedAt) === month.key,
+              )
+              .reduce((sum, payment) => sum + payment.amountNaira, 0),
+          }))}
+        />
+      </div>
       <FinanceManager students={students} payments={payments} />
     </div>
   );

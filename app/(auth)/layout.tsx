@@ -8,7 +8,7 @@ export default async function AuthLayout({
   await requireGuest();
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
+    <div className="auth-backdrop flex min-h-screen items-center justify-center p-4">
       {children}
     </div>
   );

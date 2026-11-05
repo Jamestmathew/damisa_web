@@ -1,7 +1,9 @@
 export const SESSION_COOKIE = "lms_session";
 export const RECOVERY_COOKIE = "lms_recovery";
 export const SESSION_SECONDS = 24 * 60 * 60;
-export const REMEMBER_SECONDS = 30 * SESSION_SECONDS;
+export const REMEMBER_SECONDS = SESSION_SECONDS;
+export const IDLE_COOKIE = "lms_idle";
+export const IDLE_SECONDS = 10 * 60;
 
 export function safeLocalPath(value: string | null, fallback = "/dashboard") {
   return value &&

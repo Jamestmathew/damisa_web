@@ -77,4 +77,9 @@ export const tutorNavConfig: RoleNavItem[] = [
     href: TUTOR_ROUTES.settings,
     icon: "settings",
   },
+  {
+    label: "Change password",
+    href: "/settings/change-password",
+    icon: "shield",
+  },
 ];

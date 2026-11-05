@@ -87,4 +87,9 @@ export const adminNavConfig: RoleNavItem[] = [
     href: ADMIN_ROUTES.settings,
     icon: "settings",
   },
+  {
+    label: "Change password",
+    href: "/settings/change-password",
+    icon: "shield",
+  },
 ];

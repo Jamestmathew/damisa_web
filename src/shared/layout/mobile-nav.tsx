@@ -1,4 +1,5 @@
 "use client";
+import { BrandLogo } from "@/shared/brand/logo";
 
 import { useState } from "react";
 import { Menu } from "lucide-react";
@@ -13,7 +14,6 @@ import {
 } from "@/components/ui/sheet";
 
 import { SidebarNav } from "./sidebar-nav";
-import { iconMap } from "./icon-map";
 import type { IconName, RoleNavItem } from "./types";
 
 interface MobileNavProps {
@@ -22,10 +22,12 @@ interface MobileNavProps {
   brandIcon: IconName;
 }
 
-export function MobileNav({ items, brandLabel, brandIcon }: MobileNavProps) {
+export function MobileNav({
+  items,
+  brandLabel,
+  brandIcon: _brandIcon,
+}: MobileNavProps) {
   const [open, setOpen] = useState(false);
-
-  const BrandIcon = iconMap[brandIcon];
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -40,10 +42,10 @@ export function MobileNav({ items, brandLabel, brandIcon }: MobileNavProps) {
         </Button>
       </SheetTrigger>
 
-      <SheetContent side="left" className="w-64 p-0">
+      <SheetContent side="left" className="brand-sidebar w-64 p-0">
         <SheetHeader className="border-b border-border px-4 py-3">
           <SheetTitle className="flex items-center gap-2 text-sm">
-            <BrandIcon className="size-5 text-primary" />
+            <BrandLogo size={34} />
             {brandLabel}
           </SheetTitle>
         </SheetHeader>

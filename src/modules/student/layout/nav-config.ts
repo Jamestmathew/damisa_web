@@ -72,4 +72,9 @@ export const studentNavConfig: StudentNavItem[] = [
     href: STUDENT_ROUTES.settings,
     icon: "settings",
   },
+  {
+    label: "Change password",
+    href: "/settings/change-password",
+    icon: "shield",
+  },
 ];

@@ -1,3 +1,4 @@
+import { DataBarChart } from "@/shared/charts/bar-chart";
 import type { Metadata } from "next";
 
 import { PageHeader } from "@/shared/components";
@@ -45,6 +46,25 @@ export default async function StudentPaymentsPage() {
           Account credit: {amount(balance.creditNaira)}
         </p>
       )}
+      <div className="mb-6">
+        <DataBarChart
+          title="Your payment overview"
+          description="Confirmed payments and your remaining fee balance"
+          format="naira"
+          tone="orange"
+          points={[
+            { label: "Amount paid", value: balance.paidNaira },
+            ...(balance.remainingNaira === null
+              ? []
+              : [
+                  { label: "Remaining balance", value: balance.remainingNaira },
+                ]),
+            ...(balance.creditNaira > 0
+              ? [{ label: "Account credit", value: balance.creditNaira }]
+              : []),
+          ]}
+        />
+      </div>
       <StudentPaymentsTable payments={payments} />
     </div>
   );

@@ -1,4 +1,5 @@
 import "server-only";
+import { recentMonths, monthOf } from "@/shared/charts/monthly";
 import { getOfficePeople } from "@/shared/data/people";
 import { listRecords } from "@/shared/data/records";
 import { getPayments } from "@/modules/admin/features/finance/services/finance.service";
@@ -50,8 +51,22 @@ export async function getAdminDashboardData(
         icon: "admissions",
       },
     ],
-    enrollmentTrend: [],
-    revenueTrend: [],
+    enrollmentTrend: recentMonths().map((month) => ({
+      month: month.label,
+      count: people.filter(
+        (p) => p.role === "student" && monthOf(p.created_at) === month.key,
+      ).length,
+    })),
+    revenueTrend: recentMonths().map((month) => ({
+      month: month.label,
+      amountNaira: payments
+        .filter(
+          (p) =>
+            p.status === "paid" &&
+            monthOf(p.earnedOn ?? p.recordedAt) === month.key,
+        )
+        .reduce((sum, p) => sum + p.amountNaira, 0),
+    })),
     activeUsersCount: people.filter((p) => p.status === "active").length,
     activeUsersDelta: "Active accounts in your office",
     recentAdmissions: admissions.slice(-5),

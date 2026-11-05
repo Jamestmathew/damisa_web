@@ -1,6 +1,7 @@
 "use client";
+import { BrandLogo } from "@/shared/brand/logo";
 
-import { GraduationCap, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -17,14 +18,14 @@ export function StudentSidebar({ collapsed, onToggle }: StudentSidebarProps) {
   return (
     <aside
       className={cn(
-        "hidden shrink-0 border-r border-border bg-card transition-all duration-200 md:flex md:flex-col",
+        "brand-sidebar hidden shrink-0 border-r border-border bg-card transition-all duration-200 md:flex md:flex-col",
         collapsed ? "md:w-16" : "md:w-64",
       )}
     >
       <div className="flex h-14 items-center justify-between border-b border-border px-3">
         {!collapsed && (
           <span className="flex items-center gap-2 text-sm font-semibold">
-            <GraduationCap className="size-5 text-primary" />
+            <BrandLogo size={34} />
             Student Portal
           </span>
         )}

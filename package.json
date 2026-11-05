@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test tests/*.test.mjs tests/*.test.ts",
     "check:env": "node scripts/check-env.mjs",
-    "check:database": "node scripts/check-database.mjs"
+    "check:database": "node scripts/check-database.mjs",
+    "prebuild": "node scripts/check-env.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

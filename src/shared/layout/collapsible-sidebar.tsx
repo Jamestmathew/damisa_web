@@ -1,11 +1,11 @@
 "use client";
+import { BrandLogo } from "@/shared/brand/logo";
 
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import { iconMap } from "./icon-map";
 import { SidebarNav } from "./sidebar-nav";
 import type { IconName, RoleNavItem } from "./types";
 
@@ -22,21 +22,19 @@ export function CollapsibleSidebar({
   collapsed,
   onToggle,
   brandLabel,
-  brandIcon,
+  brandIcon: _brandIcon,
 }: CollapsibleSidebarProps) {
-  const BrandIcon = iconMap[brandIcon];
-
   return (
     <aside
       className={cn(
-        "hidden shrink-0 border-r border-border bg-card transition-all duration-200 md:flex md:flex-col",
+        "brand-sidebar hidden shrink-0 border-r border-border bg-card transition-all duration-200 md:flex md:flex-col",
         collapsed ? "md:w-16" : "md:w-64",
       )}
     >
       <div className="flex h-14 items-center justify-between border-b border-border px-3">
         {!collapsed && (
           <span className="flex items-center gap-2 text-sm font-semibold">
-            <BrandIcon className="size-5 text-primary" />
+            <BrandLogo size={34} />
             {brandLabel}
           </span>
         )}
