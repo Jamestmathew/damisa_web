@@ -1,0 +1,18 @@
+export const ADMIN_ROUTES = {
+  dashboard: "/admin/dashboard",
+  users: "/admin/users",
+  students: "/admin/students",
+  teachers: "/admin/teachers",
+  courses: "/admin/courses",
+  departments: "/admin/departments",
+  classes: "/admin/classes",
+  admissions: "/admin/admissions",
+  reports: "/admin/reports",
+  analytics: "/admin/analytics",
+  finance: "/admin/finance",
+  roles: "/admin/roles",
+  announcements: "/admin/announcements",
+  activityLogs: "/admin/activity-logs",
+  settings: "/admin/settings",
+  aiGovernance: "/admin/ai-governance",
+} as const;
