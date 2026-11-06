@@ -1,3 +1,4 @@
+import { DonutChart } from "@/shared/charts/donut-chart";
 import { DataBarChart } from "@/shared/charts/bar-chart";
 import { SuperAdminStatsGrid } from "@/modules/super-admin/features/dashboard/components/stats-grid";
 import type { Office } from "@/modules/super-admin/shared/types";
@@ -51,11 +52,10 @@ export function OfficesDashboard({
         />
       )}
       <div className="grid gap-6 lg:grid-cols-2">
-        <DataBarChart
+        <DonutChart
           title="Recorded revenue by office"
-          description="All-time confirmed income · top eight offices"
+          description="All-time confirmed income across companies; smaller totals grouped as Other"
           format="naira"
-          tone="orange"
           points={[...offices]
             .sort((a, b) => b.totalRevenueNaira - a.totalRevenueNaira)
             .map((office) => ({

@@ -27,6 +27,7 @@ export async function saveUserAction(
       name: formData.get("name"),
       email: formData.get("email") || undefined,
       role: formData.get("role"),
+      staffType: formData.get("staffType") || "staff",
       matricNumber: formData.get("matricNumber") || undefined,
       staffId: formData.get("staffId") || undefined,
     });
@@ -58,6 +59,8 @@ export async function saveUserAction(
         };
 
       revalidatePath(ADMIN_ROUTES.users);
+      revalidatePath(ADMIN_ROUTES.students);
+      revalidatePath(ADMIN_ROUTES.teachers);
       return { ok: true, message: "User updated." };
     }
 
@@ -70,6 +73,8 @@ export async function saveUserAction(
       };
 
     revalidatePath(ADMIN_ROUTES.users);
+    revalidatePath(ADMIN_ROUTES.students);
+    revalidatePath(ADMIN_ROUTES.teachers);
     return {
       ok: true,
       message: "User created. Share these temporary credentials securely.",

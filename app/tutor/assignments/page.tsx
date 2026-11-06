@@ -1,20 +1,32 @@
 import type { Metadata } from "next";
 
 import { PageHeader } from "@/shared/components";
-import { getTutorAssignments, AssignmentsManager } from "@/modules/tutor/features/assignments";
+import {
+  getTutorAssignments,
+  AssignmentsManager,
+} from "@/modules/tutor/features/assignments";
 import { getTutorCourses } from "@/modules/tutor/features/courses/services/courses.service";
 
-export const metadata: Metadata = { title: "Assignments" };
+export const metadata: Metadata = { title: "Assignments & Projects" };
 
 export default async function TutorAssignmentsPage() {
-  const [assignments, courses] = await Promise.all([getTutorAssignments(), getTutorCourses()]);
+  const [assignments, courses] = await Promise.all([
+    getTutorAssignments(),
+    getTutorCourses(),
+  ]);
 
   return (
     <div>
-      <PageHeader title="Assignments" description="Create and grade assignments across your courses" />
+      <PageHeader
+        title="Assignments & Projects"
+        description="Create, collect and grade assignments and projects in one place"
+      />
       <AssignmentsManager
         assignments={assignments}
-        courseOptions={courses.map((c) => ({ id: c.id, label: `${c.code} · ${c.title}` }))}
+        courseOptions={courses.map((c) => ({
+          id: c.id,
+          label: `${c.code} · ${c.title}`,
+        }))}
       />
     </div>
   );

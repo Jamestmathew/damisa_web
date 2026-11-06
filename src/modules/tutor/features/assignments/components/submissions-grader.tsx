@@ -27,7 +27,15 @@ function SubmissionRow({
 
   function handleGrade() {
     const parsed = Number(score);
-    if (Number.isNaN(parsed)) return;
+    if (
+      !score.trim() ||
+      !Number.isFinite(parsed) ||
+      parsed < 0 ||
+      parsed > maxScore
+    ) {
+      setError(`Enter a score between 0 and ${maxScore}.`);
+      return;
+    }
 
     startTransition(async () => {
       const result = await gradeSubmissionAction(
@@ -41,7 +49,7 @@ function SubmissionRow({
 
   return (
     <Card>
-      <CardContent className="flex items-center justify-between gap-4 p-4">
+      <CardContent className="flex flex-col items-stretch justify-between gap-4 p-4 sm:flex-row sm:items-center">
         <div className="min-w-0 flex-1">
           <p className="font-medium text-foreground">
             {submission.studentName}

@@ -1,3 +1,6 @@
+import { CreateCourseForm } from "@/modules/tutor/features/course-builder/components/create-course-form";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -17,7 +20,9 @@ interface CourseBuilderPageProps {
   params: Promise<{ courseId: string }>;
 }
 
-export default async function CourseBuilderPage({ params }: CourseBuilderPageProps) {
+export default async function CourseBuilderPage({
+  params,
+}: CourseBuilderPageProps) {
   const { courseId } = await params;
   const course = await getTutorCourseById(courseId);
 
@@ -28,14 +33,41 @@ export default async function CourseBuilderPage({ params }: CourseBuilderPagePro
       <PageHeader
         title={course.title}
         description={`${course.code} · ${course.creditUnits} credit units`}
-        action={<PublishToggle courseId={course.id} status={course.status} courseTitle={course.title} />}
+        action={
+          <PublishToggle
+            courseId={course.id}
+            status={course.status}
+            courseTitle={course.title}
+          />
+        }
       />
 
+      <div className="rounded-lg border bg-muted/30 p-4 text-sm">
+        <p>
+          Build your lessons, then publish this course. Admin assigns students
+          to you; your published courses appear automatically in their portal.
+        </p>
+        <Button asChild className="mt-3">
+          <Link href={`/tutor/courses/${course.id}/lessons`}>
+            Build and manage lessons
+          </Link>
+        </Button>
+      </div>
+      <details className="rounded-lg border bg-card p-4">
+        <summary className="cursor-pointer font-semibold">
+          Edit course details
+        </summary>
+        <div className="mt-4">
+          <CreateCourseForm course={course} />
+        </div>
+      </details>
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
             <CardTitle className="text-base">Overview</CardTitle>
-            <Badge variant={course.status === "published" ? "success" : "secondary"}>
+            <Badge
+              variant={course.status === "published" ? "success" : "secondary"}
+            >
               {course.status === "published" ? "Published" : "Draft"}
             </Badge>
           </div>
@@ -51,7 +83,10 @@ export default async function CourseBuilderPage({ params }: CourseBuilderPagePro
           <CardTitle className="text-base">Modules</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <CourseBuilderModulesList courseId={course.id} modules={course.modules} />
+          <CourseBuilderModulesList
+            courseId={course.id}
+            modules={course.modules}
+          />
           <AddModuleForm courseId={course.id} />
         </CardContent>
       </Card>

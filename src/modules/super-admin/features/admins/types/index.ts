@@ -1,8 +1,12 @@
 import type { AuthUser } from "@/modules/auth/types";
 
-export type AdminRow = Pick<AuthUser, "id" | "name" | "email" | "status" | "staffId" | "createdAt"> & {
+export type AdminRow = Pick<
+  AuthUser,
+  "id" | "name" | "email" | "status" | "staffId" | "createdAt"
+> & {
   officeId: string | null;
   officeName: string | null;
+  officeState?: string;
 };
 
 export type AdminActionResult =

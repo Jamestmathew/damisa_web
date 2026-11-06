@@ -4,13 +4,19 @@ import { z } from "zod";
 export const userFormSchema = z
   .object({
     id: z.string().optional(),
-    name: z.string().min(2, "Name must be at least 2 characters"),
+    name: z
+      .string()
+      .trim()
+      .min(2, "Name must be at least 2 characters")
+      .max(150),
     email: z
       .string()
+      .trim()
       .email("Enter a valid email address")
       .optional()
       .or(z.literal("")),
     role: z.enum(["student", "tutor"]),
+    staffType: z.enum(["staff", "intern"]).optional(),
     matricNumber: z
       .string()
       .trim()
@@ -30,6 +36,13 @@ export const userFormSchema = z
       });
     }
 
+    if (data.role === "tutor" && !data.staffId?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["staffId"],
+        message: "Staff ID is required for tutors",
+      });
+    }
     if (data.role === "tutor" && !data.email?.trim()) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

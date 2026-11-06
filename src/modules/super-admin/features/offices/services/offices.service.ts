@@ -1,4 +1,6 @@
 import "server-only";
+import { collectRows } from "@/shared/data/pagination";
+import { cacheRequest } from "@/shared/security/request-cache";
 import { requireRole } from "@/shared/rbac";
 
 import { createAdminClient } from "@/supabase/admin";
@@ -41,39 +43,61 @@ function mapOffice(office: OfficeRow, profiles: ProfileRow[]): Office {
   };
 }
 
-export async function getOffices(): Promise<Office[]> {
+async function loadOffices(): Promise<Office[]> {
   await requireRole(["super_admin"]);
   const supabase = createAdminClient();
 
-  const [
-    { data: offices, error: officesError },
-    { data: profiles, error: profilesError },
-    { data: income, error: incomeError },
-  ] = await Promise.all([
-    supabase
-      .from("offices")
-      .select("id, name, created_at, updated_at")
-      .order("name", { ascending: true }),
-
-    supabase.from("profiles").select("id, name, role, office_id"),
-    supabase
-      .from("lms_records")
-      .select("office_id,payload")
-      .eq("kind", "payment"),
+  const [offices, profiles, income] = await Promise.all([
+    collectRows<OfficeRow>(
+      supabase
+        .from("offices")
+        .select("id,name,created_at,updated_at")
+        .order("id"),
+    ),
+    collectRows<ProfileRow>(
+      supabase.from("profiles").select("id,name,role,office_id").order("id"),
+    ),
+    collectRows<{
+      office_id: string;
+      payload: { status: string; amountNaira: number };
+    }>(
+      supabase
+        .from("lms_records")
+        .select("id,office_id,payload")
+        .eq("kind", "payment")
+        .order("id"),
+    ),
   ]);
-
-  if (officesError) {
-    throw new Error(`Failed to load offices: ${officesError.message}`);
-  }
-
-  if (profilesError) {
-    throw new Error(
-      `Failed to load office assignments: ${profilesError.message}`,
-    );
-  }
-
-  if (incomeError) throw new Error("Unable to load recorded company income.");
+  offices.sort((a, b) => a.name.localeCompare(b.name));
+  const accountMetadata = new Map(
+    await Promise.all(
+      ((profiles ?? []) as ProfileRow[])
+        .filter((p) => p.role === "tutor" || p.role === "admin")
+        .map(async (p) => {
+          const account = await supabase.auth.admin.getUserById(p.id);
+          if (account.error)
+            throw new Error("Unable to load company staffing details.");
+          return [p.id, account.data.user?.user_metadata ?? {}] as const;
+        }),
+    ),
+  );
   return (offices ?? []).map((office) => ({
+    totalStaff: (profiles ?? []).filter(
+      (p) => p.office_id === office.id && ["admin", "tutor"].includes(p.role),
+    ).length,
+    totalInterns: (profiles ?? []).filter(
+      (p) =>
+        p.office_id === office.id &&
+        p.role === "tutor" &&
+        accountMetadata.get(p.id)?.staffType === "intern",
+    ).length,
+    state:
+      accountMetadata.get(
+        (profiles ?? []).find(
+          (p) => p.office_id === office.id && p.role === "admin",
+        )?.id ?? "",
+      )?.officeState ?? "",
+
     ...mapOffice(office as OfficeRow, (profiles ?? []) as ProfileRow[]),
     totalRevenueNaira: (income ?? [])
       .filter(
@@ -90,6 +114,8 @@ export async function getOffices(): Promise<Office[]> {
       ),
   }));
 }
+
+export const getOffices = cacheRequest(loadOffices);
 
 export async function findOfficeByName(
   name: string,

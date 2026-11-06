@@ -1,13 +1,17 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { authorizeAction } from "@/shared/security/action";
-import { getContext } from "@/shared/security/context";
 import { clearRequestCache } from "@/shared/security/request-cache";
 import { createAdminClient } from "@/supabase/admin";
 import { uploadImage, removeImage } from "@/shared/media/storage";
 export async function updateAvatarAction(data: FormData) {
-  await authorizeAction(["student", "tutor"]);
-  const { user, officeId } = await getContext();
+  const user = await authorizeAction([
+    "student",
+    "tutor",
+    "admin",
+    "super_admin",
+  ]);
+  const folder = `accounts/${user.id}/profile`;
   const file = data.get("avatar");
   if (!(file instanceof File) || !file.size)
     return { ok: false as const, error: "Choose a profile picture." };
@@ -19,14 +23,18 @@ export async function updateAvatarAction(data: FormData) {
     .single();
   let path: string | undefined;
   try {
-    path = await uploadImage(file, `${officeId}/profiles/${user.id}`);
+    path = await uploadImage(file, folder);
     const { error } = await db
       .from("profiles")
       .update({ avatar_url: path, updated_at: new Date().toISOString() })
       .eq("id", user.id);
     if (error) throw new Error("Unable to update your profile picture.");
     if (
-      previous.data?.avatar_url?.startsWith(`${officeId}/profiles/${user.id}/`)
+      previous.data?.avatar_url?.startsWith(`${folder}/`) ||
+      (user.officeId &&
+        previous.data?.avatar_url?.startsWith(
+          `${user.officeId}/profiles/${user.id}/`,
+        ))
     )
       await removeImage(previous.data.avatar_url).catch(() => {});
     await clearRequestCache();

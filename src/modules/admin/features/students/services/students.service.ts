@@ -3,9 +3,10 @@ import { listRecords } from "@/shared/data/records";
 import { getOfficePeople } from "@/shared/data/people";
 import type { AdminStudent, AdminStudentProfile } from "../types";
 export async function getStudents(): Promise<AdminStudent[]> {
-  return (await getOfficePeople())
+  return (await getOfficePeople(true, "student"))
     .filter((p) => p.role === "student")
     .map((p) => ({
+      matricNumber: p.matric_number,
       id: p.id,
       name: p.name,
       email: p.email,

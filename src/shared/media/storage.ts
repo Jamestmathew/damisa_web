@@ -1,5 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/supabase/admin";
+import { requireAuth } from "@/modules/auth/lib/route-guard";
 import { getContext } from "@/shared/security/context";
 import { enforceRateLimit } from "@/shared/security/rate-limit";
 import { cacheRequest } from "@/shared/security/request-cache";
@@ -22,8 +23,13 @@ async function ensureBucket() {
     throw new Error("Image storage is unavailable.");
 }
 export async function uploadImage(file: File, folder: string) {
-  const { user, officeId } = await getContext();
-  if (!folder.startsWith(`${officeId}/`))
+  const user = await requireAuth();
+  if (
+    !(
+      folder === `accounts/${user.id}/profile` ||
+      (user.officeId && folder.startsWith(`${user.officeId}/`))
+    )
+  )
     throw new Error("Image upload access denied.");
   if (!file.size || file.size > MAX_IMAGE_BYTES)
     throw new Error("Choose an image up to 3 MB.");
@@ -39,8 +45,14 @@ export async function uploadImage(file: File, folder: string) {
   return path;
 }
 export async function removeImage(path: string) {
-  const { officeId } = await getContext();
-  if (!path.startsWith(`${officeId}/`)) throw new Error("Image access denied.");
+  const user = await requireAuth();
+  if (
+    !(
+      path.startsWith(`accounts/${user.id}/profile/`) ||
+      (user.officeId && path.startsWith(`${user.officeId}/`))
+    )
+  )
+    throw new Error("Image access denied.");
   const { error } = await createAdminClient()
     .storage.from(MEDIA_BUCKET)
     .remove([path]);

@@ -15,13 +15,17 @@ import type { AdminAnnouncement } from "../types";
 import { AnnouncementFormDialog } from "./announcement-form-dialog";
 
 const AUDIENCE_LABEL: Record<AdminAnnouncement["audience"], string> = {
-  everyone: "Everyone",
+  everyone: "Students and Staff",
   students: "Students",
-  tutors: "Tutors",
+  tutors: "Staff",
   admins: "Admins",
 };
 
-export function AnnouncementsManager({ announcements }: { announcements: AdminAnnouncement[] }) {
+export function AnnouncementsManager({
+  announcements,
+}: {
+  announcements: AdminAnnouncement[];
+}) {
   const router = useRouter();
   const [query, setQuery] = useState("");
 
@@ -59,25 +63,41 @@ export function AnnouncementsManager({ announcements }: { announcements: AdminAn
               <CardContent className="flex items-start justify-between gap-4 p-5">
                 <div className="min-w-0 space-y-1">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-foreground">{announcement.title}</p>
-                    <Badge variant="outline">{AUDIENCE_LABEL[announcement.audience]}</Badge>
+                    <p className="font-medium text-foreground">
+                      {announcement.title}
+                    </p>
+                    <Badge variant="outline">
+                      {AUDIENCE_LABEL[announcement.audience]}
+                    </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">{announcement.body}</p>
-                  <p className="text-xs text-muted-foreground">{announcement.postedAt}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {announcement.body}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {announcement.postedAt}
+                  </p>
                 </div>
                 <div className="flex shrink-0 gap-1">
                   <AnnouncementFormDialog
                     announcement={announcement}
                     onSaved={() => router.refresh()}
                     trigger={
-                      <Button variant="ghost" size="icon" aria-label={`Edit ${announcement.title}`}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Edit ${announcement.title}`}
+                      >
                         <Pencil className="size-4" />
                       </Button>
                     }
                   />
                   <ConfirmDialog
                     trigger={
-                      <Button variant="ghost" size="icon" aria-label={`Delete ${announcement.title}`}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Delete ${announcement.title}`}
+                      >
                         <Trash2 className="size-4 text-destructive" />
                       </Button>
                     }

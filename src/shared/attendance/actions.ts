@@ -20,6 +20,7 @@ function refresh() {
   for (const path of [
     "/admin/attendance",
     "/admin/tutor-attendance",
+    "/admin/teachers",
     "/super-admin/attendance",
     "/student/attendance",
     "/tutor/my-attendance",

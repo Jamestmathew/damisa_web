@@ -9,6 +9,8 @@ export async function getTutorCourses() {
   ]);
   return courses.map((course) => ({
     ...course,
+    modules: course.modules ?? [],
+    moduleCount: course.modules?.length ?? 0,
     studentCount: new Set(
       classes
         .filter((c) => c.courseIds?.includes(course.id))
@@ -39,7 +41,7 @@ export async function createCourse(input: {
     ...input,
     instructorId: user.id,
     instructorName: user.name,
-    assessmentPolicy: { caWeight: 30, examWeight: 70 },
+    assessmentPolicy: { caWeight: 100, examWeight: 0 },
     id: "",
     studentCount: 0,
     moduleCount: 0,

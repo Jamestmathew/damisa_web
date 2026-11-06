@@ -1,4 +1,7 @@
-import { DataBarChart } from "@/shared/charts/bar-chart";
+import { TrendChart } from "@/shared/charts/trend-chart";
+import { DonutChart } from "@/shared/charts/donut-chart";
+import { listRecords } from "@/shared/data/records";
+import { recentMonths, monthOf } from "@/shared/charts/monthly";
 import type { Metadata } from "next";
 
 import { requireAuth } from "@/modules/auth/lib/route-guard";
@@ -7,10 +10,8 @@ import {
   TutorWelcomeCard,
   TutorStatsGrid,
   MyCoursesOverview,
-  UpcomingClasses,
   RecentStudentActivityWidget,
   PendingAssignmentReviews,
-  QuizStatistics,
   AttendanceSummaryWidget,
   TutorAnnouncementsWidget,
   TutorQuickActions,
@@ -22,6 +23,10 @@ export const metadata: Metadata = { title: "Tutor Dashboard" };
 export default async function TutorDashboardPage() {
   const session = await requireAuth();
   const data = await getTutorDashboardData(session.name);
+  const submissions = await listRecords<{
+    submittedAt: string;
+    status: string;
+  }>("submission");
 
   return (
     <div className="space-y-6">
@@ -29,21 +34,36 @@ export default async function TutorDashboardPage() {
       <TutorStatsGrid stats={data.stats} />
 
       <MyCoursesOverview courses={data.myCourses} />
-      <DataBarChart
-        title="Quiz performance"
-        description="Average submitted-attempt scores for your quizzes"
-        format="percent"
-        tone="orange"
-        points={data.quizStats
-          .filter((q) => q.attemptCount > 0)
-          .map((q) => ({ label: q.quizTitle, value: q.averageScorePercent }))}
-      />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <TrendChart
+          title="Assignment and project submissions"
+          description="Submissions received over the last six months"
+          points={recentMonths().map((month) => ({
+            label: month.label,
+            value: submissions.filter(
+              (s) => s.submittedAt && monthOf(s.submittedAt) === month.key,
+            ).length,
+          }))}
+        />
+        <DonutChart
+          title="Grading progress"
+          description="Submitted work reviewed and awaiting grading"
+          points={[
+            {
+              label: "Graded",
+              value: submissions.filter((s) => s.status === "graded").length,
+            },
+            {
+              label: "Awaiting grading",
+              value: submissions.filter((s) => s.status !== "graded").length,
+            },
+          ]}
+        />
+      </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-        <UpcomingClasses classes={data.upcomingClasses} />
         <PendingAssignmentReviews reviews={data.pendingReviews} />
         <RecentStudentActivityWidget activities={data.recentActivity} />
-        <QuizStatistics stats={data.quizStats} />
         <AttendanceSummaryWidget ratePercent={data.attendanceRatePercent} />
         <TutorAnnouncementsWidget announcements={data.announcements} />
       </div>

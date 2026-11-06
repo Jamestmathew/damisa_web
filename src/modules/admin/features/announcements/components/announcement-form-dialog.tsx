@@ -44,7 +44,11 @@ interface AnnouncementFormDialogProps {
   onSaved: () => void;
 }
 
-export function AnnouncementFormDialog({ trigger, announcement, onSaved }: AnnouncementFormDialogProps) {
+export function AnnouncementFormDialog({
+  trigger,
+  announcement,
+  onSaved,
+}: AnnouncementFormDialogProps) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [state, setState] = useState<AnnouncementActionResult | null>(null);
@@ -52,7 +56,12 @@ export function AnnouncementFormDialog({ trigger, announcement, onSaved }: Annou
   const form = useForm<AnnouncementFormSchema>({
     resolver: zodResolver(announcementFormSchema),
     defaultValues: announcement
-      ? { id: announcement.id, title: announcement.title, body: announcement.body, audience: announcement.audience }
+      ? {
+          id: announcement.id,
+          title: announcement.title,
+          body: announcement.body,
+          audience: announcement.audience,
+        }
       : { title: "", body: "", audience: "everyone" },
   });
 
@@ -70,7 +79,8 @@ export function AnnouncementFormDialog({ trigger, announcement, onSaved }: Annou
 
       if (!result.ok && result.fieldErrors) {
         for (const [field, message] of Object.entries(result.fieldErrors)) {
-          if (message) form.setError(field as keyof AnnouncementFormSchema, { message });
+          if (message)
+            form.setError(field as keyof AnnouncementFormSchema, { message });
         }
         return;
       }
@@ -84,20 +94,36 @@ export function AnnouncementFormDialog({ trigger, announcement, onSaved }: Annou
   }
 
   return (
-    <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (!next) setState(null); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) setState(null);
+      }}
+    >
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{announcement ? "Edit announcement" : "New announcement"}</DialogTitle>
+          <DialogTitle>
+            {announcement ? "Edit announcement" : "New announcement"}
+          </DialogTitle>
           <DialogDescription>
-            {announcement ? "Update this announcement." : "Post a new announcement to the platform."}
+            {announcement
+              ? "Update this announcement."
+              : "Post a new announcement to the platform."}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          {state && !state.ok ? <FormStatusMessage variant="error" message={state.error} /> : null}
+          {state && !state.ok ? (
+            <FormStatusMessage variant="error" message={state.error} />
+          ) : null}
 
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4"
+            noValidate
+          >
             <FormField
               control={form.control}
               name="title"
@@ -125,10 +151,11 @@ export function AnnouncementFormDialog({ trigger, announcement, onSaved }: Annou
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="everyone">Everyone</SelectItem>
+                      <SelectItem value="everyone">
+                        Students and Staff
+                      </SelectItem>
                       <SelectItem value="students">Students</SelectItem>
-                      <SelectItem value="tutors">Tutors</SelectItem>
-                      <SelectItem value="admins">Admins</SelectItem>
+                      <SelectItem value="tutors">Staff</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -150,7 +177,12 @@ export function AnnouncementFormDialog({ trigger, announcement, onSaved }: Annou
               )}
             />
 
-            <LoadingButton type="submit" className="w-full" isLoading={isPending} loadingText="Saving...">
+            <LoadingButton
+              type="submit"
+              className="w-full"
+              isLoading={isPending}
+              loadingText="Saving..."
+            >
               {announcement ? "Save changes" : "Post announcement"}
             </LoadingButton>
           </form>

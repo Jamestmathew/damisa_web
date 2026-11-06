@@ -61,7 +61,7 @@ export async function createAdminCourseAction(data: FormData) {
         payload: {
           ...parsed.data,
           instructorName: tutor.name,
-          assessmentPolicy: { caWeight: 30, examWeight: 70 },
+          assessmentPolicy: { caWeight: 100, examWeight: 0 },
           studentCount: 0,
           moduleCount: 0,
           modules: [],

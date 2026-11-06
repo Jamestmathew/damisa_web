@@ -1,5 +1,6 @@
 "use client";
 
+import { UserFormDialog } from "@/modules/admin/features/users/components/user-form-dialog";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -24,7 +25,7 @@ export function StudentsManager({ students }: { students: AdminStudent[] }) {
       (student) =>
         student.name.toLowerCase().includes(q) ||
         student.email.toLowerCase().includes(q) ||
-        student.program.toLowerCase().includes(q)
+        student.program.toLowerCase().includes(q),
     );
   }, [students, query]);
 
@@ -35,21 +36,59 @@ export function StudentsManager({ students }: { students: AdminStudent[] }) {
       render: (student) => (
         <div>
           <p className="font-medium text-foreground">{student.name}</p>
-          <p className="text-xs text-muted-foreground">{student.email}</p>
+          {student.email &&
+            !/@students\.(local|invalid)$/.test(student.email) && (
+              <p className="text-xs text-muted-foreground">{student.email}</p>
+            )}
         </div>
       ),
     },
-    { key: "program", header: "Program", render: (student) => student.program },
-    { key: "level", header: "Level", render: (student) => student.level },
-    { key: "status", header: "Status", render: (student) => <UserStatusBadge status={student.status} /> },
-    { key: "enrolledAt", header: "Enrolled", render: (student) => student.enrolledAt },
+    {
+      key: "matricNumber",
+      header: "Matric number",
+      render: (student) => student.matricNumber ?? "—",
+    },
+
+    {
+      key: "status",
+      header: "Status",
+      render: (student) => <UserStatusBadge status={student.status} />,
+    },
+    {
+      key: "enrolledAt",
+      header: "Enrolled",
+      render: (student) => student.enrolledAt,
+    },
     {
       key: "actions",
       header: "",
       className: "text-right",
       render: (student) => (
         <div className="flex justify-end gap-1">
-          <Button asChild variant="ghost" size="icon" aria-label={`View ${student.name}'s profile`}>
+          <UserFormDialog
+            user={{
+              id: student.id,
+              name: student.name,
+              email: student.email,
+              role: "student",
+              status: student.status,
+              matricNumber: student.matricNumber,
+              staffId: null,
+              createdAt: student.enrolledAt,
+            }}
+            trigger={
+              <Button variant="outline" size="sm">
+                Edit
+              </Button>
+            }
+            onSaved={() => router.refresh()}
+          />
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            aria-label={`View ${student.name}'s profile`}
+          >
             <Link href={`/admin/students/${student.id}`}>
               <Eye className="size-4" />
             </Link>
@@ -57,7 +96,11 @@ export function StudentsManager({ students }: { students: AdminStudent[] }) {
           {student.status === "suspended" ? (
             <ConfirmDialog
               trigger={
-                <Button variant="ghost" size="icon" aria-label={`Reactivate ${student.name}`}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Reactivate ${student.name}`}
+                >
                   <CheckCircle2 className="size-4 text-success" />
                 </Button>
               }
@@ -72,7 +115,11 @@ export function StudentsManager({ students }: { students: AdminStudent[] }) {
           ) : (
             <ConfirmDialog
               trigger={
-                <Button variant="ghost" size="icon" aria-label={`Suspend ${student.name}`}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Suspend ${student.name}`}
+                >
                   <Ban className="size-4 text-destructive" />
                 </Button>
               }
@@ -92,7 +139,18 @@ export function StudentsManager({ students }: { students: AdminStudent[] }) {
 
   return (
     <div>
-      <EntityToolbar searchValue={query} onSearchChange={setQuery} searchPlaceholder="Search students..." />
+      <EntityToolbar
+        searchValue={query}
+        onSearchChange={setQuery}
+        searchPlaceholder="Search students..."
+        action={
+          <UserFormDialog
+            initialRole="student"
+            trigger={<Button>Add student</Button>}
+            onSaved={() => router.refresh()}
+          />
+        }
+      />
       <DataTable
         columns={columns}
         rows={filtered}

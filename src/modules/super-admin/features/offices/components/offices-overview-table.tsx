@@ -7,7 +7,18 @@ import type { Office } from "@/modules/super-admin/shared/types";
 
 export function OfficesOverviewTable({ offices }: { offices: Office[] }) {
   const columns: DataTableColumn<Office>[] = [
-    { key: "name", header: "Office", render: (office) => <span className="font-medium text-foreground">{office.name}</span> },
+    {
+      key: "name",
+      header: "Company / Branch",
+      render: (office) => (
+        <span className="font-medium text-foreground">{office.name}</span>
+      ),
+    },
+    {
+      key: "state",
+      header: "State",
+      render: (office) => office.state || "Not set",
+    },
     {
       key: "admin",
       header: "Assigned Admin",
@@ -18,7 +29,21 @@ export function OfficesOverviewTable({ offices }: { offices: Office[] }) {
           <Badge variant="outline">Unassigned</Badge>
         ),
     },
-    { key: "students", header: "Total Students", render: (office) => office.totalStudents.toLocaleString() },
+    {
+      key: "students",
+      header: "Total Students",
+      render: (office) => office.totalStudents.toLocaleString(),
+    },
+    {
+      key: "staff",
+      header: "Staff",
+      render: (office) => office.totalStaff ?? 0,
+    },
+    {
+      key: "interns",
+      header: "Interns",
+      render: (office) => office.totalInterns ?? 0,
+    },
     {
       key: "revenue",
       header: "Total Revenue",

@@ -1,7 +1,5 @@
-import { ProfilePictureForm } from "@/shared/account/profile-picture-form";
+import { AccountSettings } from "@/shared/account/account-settings";
 import type { Metadata } from "next";
-import Link from "next/link";
-import { KeyRound } from "lucide-react";
 
 import {
   Card,
@@ -10,9 +8,7 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/modules/student/shared/components";
-import { STUDENT_ROUTES } from "@/modules/student/shared/constants";
 import {
   getPreferences,
   ProfilePreferencesForm,
@@ -32,7 +28,7 @@ export default async function SettingsPage() {
         description="Manage your profile and preferences"
       />
 
-      <ProfilePictureForm />
+      <AccountSettings showName={false} />
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Profile</CardTitle>
@@ -68,21 +64,6 @@ export default async function SettingsPage() {
         </CardHeader>
         <CardContent>
           <AppearanceSettingsForm initialValues={preferences.appearance} />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Security</CardTitle>
-          <CardDescription>Manage your account password.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button asChild variant="outline">
-            <Link href={STUDENT_ROUTES.settings + "/change-password"}>
-              <KeyRound className="size-4" />
-              Change password
-            </Link>
-          </Button>
         </CardContent>
       </Card>
     </div>

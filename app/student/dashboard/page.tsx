@@ -1,4 +1,8 @@
-import { DataBarChart } from "@/shared/charts/bar-chart";
+import { listRecords } from "@/shared/data/records";
+import type { TutorEnrollment } from "@/shared/data/tutor-enrollment";
+import { DonutChart } from "@/shared/charts/donut-chart";
+import { TrendChart } from "@/shared/charts/trend-chart";
+import { monthOf, recentMonths } from "@/shared/charts/monthly";
 import type { Metadata } from "next";
 
 import { requireAuth } from "@/modules/auth/lib/route-guard";
@@ -11,42 +15,52 @@ import {
   RecentAssignments,
   RecentGrades,
   AnnouncementsWidget,
-  CalendarPreview,
   QuickActions,
 } from "@/modules/student/features/dashboard";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
 export default async function DashboardPage() {
+  const tutorAssignments = (await listRecords<TutorEnrollment>("class")).filter(
+    (e) => e.type === "tutor_assignment" && e.tutorId,
+  );
   const session = await requireAuth();
+  const submissions = await listRecords<{ submittedAt: string }>("submission");
+  const completed = await listRecords<{ courseId: string }>("lesson_progress");
   const data = await getDashboardData(session.name);
 
   return (
     <div className="space-y-6">
+      {tutorAssignments.map((e) => (
+        <div key={e.id} className="rounded-lg border bg-card p-4">
+          <p className="text-sm text-muted-foreground">Your assigned tutor</p>
+          <p className="font-semibold">{e.tutorName}</p>
+          <p className="text-sm text-muted-foreground">
+            Published courses from your tutor appear in Courses.
+          </p>
+        </div>
+      ))}
       <WelcomeCard firstName={data.studentFirstName} />
       <StatsGrid stats={data.stats} />
       <RecentCourses courses={data.recentCourses} />
       <div className="grid gap-6 lg:grid-cols-2">
-        <DataBarChart
-          title="Course progress"
-          description="Progress in your recent courses"
-          format="percent"
-          points={data.recentCourses.map((c) => ({
-            label: c.code,
-            value: c.progressPercent,
+        <TrendChart
+          title="Your submissions"
+          description="Assignments and projects submitted over the last six months"
+          points={recentMonths().map((month) => ({
+            label: month.label,
+            value: submissions.filter(
+              (s) => s.submittedAt && monthOf(s.submittedAt) === month.key,
+            ).length,
           }))}
         />
-        <DataBarChart
-          title="Recent assessment scores"
-          description="Scores as a percentage of the maximum mark"
-          format="percent"
-          tone="orange"
-          points={data.recentGrades
-            .filter((g) => g.maxScore > 0)
-            .map((g) => ({
-              label: g.assessment,
-              value: (g.score / g.maxScore) * 100,
-            }))}
+        <DonutChart
+          title="Learning activity"
+          description="Completed lessons by enrolled course"
+          points={data.recentCourses.map((course) => ({
+            label: course.title,
+            value: completed.filter((p) => p.courseId === course.id).length,
+          }))}
         />
       </div>
 
@@ -55,7 +69,6 @@ export default async function DashboardPage() {
         <RecentAssignments assignments={data.recentAssignments} />
         <RecentGrades grades={data.recentGrades} />
         <AnnouncementsWidget announcements={data.announcements} />
-        <CalendarPreview items={data.calendarPreview} />
         <QuickActions />
       </div>
     </div>

@@ -126,6 +126,10 @@ export async function getUsers(): Promise<AdminUserRow[]> {
         name: profile.name,
         email: data.user?.email ?? "",
         role: profile.role,
+        staffType:
+          data.user?.user_metadata?.staffType === "intern"
+            ? ("intern" as const)
+            : ("staff" as const),
         status: profile.status,
         matricNumber: profile.matric_number,
         staffId: profile.staff_id,
@@ -141,6 +145,7 @@ export async function createUser(input: {
   name: string;
   email: string;
   role: AdminCreatableRole;
+  staffType?: "staff" | "intern";
   matricNumber?: string | null;
   staffId?: string | null;
 }): Promise<
@@ -159,6 +164,40 @@ export async function createUser(input: {
 
   const supabase = createAdminClient();
 
+  if (!["student", "tutor"].includes(input.role))
+    return {
+      ok: false,
+      error: "Only student and tutor accounts can be created here.",
+    };
+  const identifier =
+    input.role === "student"
+      ? input.matricNumber?.trim()
+      : input.staffId?.trim();
+  if (identifier) {
+    const column = input.role === "student" ? "matric_number" : "staff_id";
+    const { data: duplicates, error: lookupError } = await supabase
+      .from("profiles")
+      .select("id")
+      .ilike(column, identifier.replace(/[\\%_]/g, "\\$&"))
+      .limit(1);
+    if (lookupError)
+      return {
+        ok: false,
+        error: "Unable to verify the account identifier. Please retry.",
+      };
+    if (duplicates?.length)
+      return {
+        ok: false,
+        error:
+          input.role === "student"
+            ? "This matric number is already registered."
+            : "This staff ID is already registered.",
+        fieldErrors: {
+          [input.role === "student" ? "matricNumber" : "staffId"]:
+            "This identifier is already registered.",
+        },
+      };
+  }
   const temporaryPassword = generateTemporaryPassword();
 
   /*
@@ -190,6 +229,8 @@ export async function createUser(input: {
     email_confirm: true,
     user_metadata: {
       name: input.name,
+      staffType:
+        input.role === "tutor" ? (input.staffType ?? "staff") : undefined,
       matric_number: input.matricNumber?.trim() || null,
       staff_id: input.staffId?.trim() || null,
     },
@@ -211,16 +252,19 @@ export async function createUser(input: {
    */
   const { error: profileError } = await supabase
     .from("profiles")
-    .update({
-      name: input.name.trim(),
-      role: input.role,
-      status: "active",
-      matric_number: input.matricNumber?.trim() || null,
-      staff_id: input.staffId?.trim() || null,
-      office_id: officeResult.officeId,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", userId)
+    .upsert(
+      {
+        id: userId,
+        name: input.name.trim(),
+        role: input.role,
+        status: "active",
+        matric_number: input.matricNumber?.trim() || null,
+        staff_id: input.staffId?.trim() || null,
+        office_id: officeResult.officeId,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "id" },
+    )
     .select("id")
     .single();
 
@@ -249,6 +293,7 @@ export async function updateUser(
     name: string;
     email?: string;
     role: AdminCreatableRole;
+    staffType?: "staff" | "intern";
     matricNumber?: string | null;
     staffId?: string | null;
   },
@@ -286,12 +331,15 @@ export async function updateUser(
     email?: string;
     user_metadata: {
       name: string;
+      staffType?: "staff" | "intern";
       matric_number: string | null;
       staff_id: string | null;
     };
   } = {
     user_metadata: {
       name: input.name.trim(),
+      staffType:
+        input.role === "tutor" ? (input.staffType ?? "staff") : undefined,
       matric_number: input.matricNumber?.trim() || null,
       staff_id: input.staffId?.trim() || null,
     },

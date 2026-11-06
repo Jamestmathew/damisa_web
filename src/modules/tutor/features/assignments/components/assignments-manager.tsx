@@ -32,7 +32,7 @@ export function AssignmentsManager({
           trigger={
             <Button>
               <Plus className="size-4" />
-              New assignment
+              New assignment / project
             </Button>
           }
         />
@@ -44,21 +44,30 @@ export function AssignmentsManager({
         <div className="space-y-3">
           {assignments.map((assignment) => {
             const gradingPercent =
-              assignment.submittedCount === 0 ? 0 : Math.round((assignment.gradedCount / assignment.submittedCount) * 100);
+              assignment.submittedCount === 0
+                ? 0
+                : Math.round(
+                    (assignment.gradedCount / assignment.submittedCount) * 100,
+                  );
 
             return (
               <Card key={assignment.id}>
                 <CardContent className="flex items-center justify-between gap-4 p-4">
                   <div className="flex-1">
-                    <p className="font-medium text-foreground">{assignment.title}</p>
+                    <p className="font-medium text-foreground">
+                      {assignment.workType === "project" ? "Project: " : ""}
+                      {assignment.title}
+                    </p>
                     <p className="text-xs text-muted-foreground">
-                      {assignment.courseCode} · Due {assignment.dueAt} · {assignment.maxScore} pts
+                      {assignment.courseCode} · Due {assignment.dueAt} ·{" "}
+                      {assignment.maxScore} pts
                     </p>
                     <div className="mt-2 max-w-xs space-y-1">
                       <div className="flex justify-between text-xs text-muted-foreground">
                         <span>Graded</span>
                         <span>
-                          {assignment.gradedCount}/{assignment.submittedCount} submitted
+                          {assignment.gradedCount}/{assignment.submittedCount}{" "}
+                          submitted
                         </span>
                       </div>
                       <Progress value={gradingPercent} />
@@ -66,14 +75,22 @@ export function AssignmentsManager({
                   </div>
                   <div className="flex shrink-0 gap-1">
                     <Button asChild variant="outline" size="sm">
-                      <Link href={TUTOR_ROUTES.assignmentSubmissions(assignment.id)}>Review submissions</Link>
+                      <Link
+                        href={TUTOR_ROUTES.assignmentSubmissions(assignment.id)}
+                      >
+                        Review submissions
+                      </Link>
                     </Button>
                     <AssignmentFormDialog
                       courseOptions={courseOptions}
                       assignment={assignment}
                       onSaved={() => router.refresh()}
                       trigger={
-                        <Button variant="ghost" size="icon" aria-label={`Edit ${assignment.title}`}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={`Edit ${assignment.workType === "project" ? "Project: " : ""}{assignment.title}`}
+                        >
                           <Pencil className="size-4" />
                         </Button>
                       }

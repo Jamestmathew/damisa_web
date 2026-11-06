@@ -32,8 +32,7 @@ export function GradeSummaryCard({
               {summary.courseTitle}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              CA {summary.caWeight ?? 30}% / Exam {summary.examWeight ?? 70}% ·{" "}
-              {summary.provisional ? "Provisional" : "Final"}
+              Graded assignments and projects
             </p>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-xl font-semibold text-foreground">

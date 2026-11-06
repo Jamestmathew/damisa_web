@@ -5,7 +5,12 @@ import { authorizeAction } from "@/shared/security/action";
 import { createAdminClient } from "@/supabase/admin";
 import { clearRequestCache } from "@/shared/security/request-cache";
 export async function updateAccountNameAction(data: FormData) {
-  const user = await authorizeAction(["student", "tutor"]);
+  const user = await authorizeAction([
+    "student",
+    "tutor",
+    "admin",
+    "super_admin",
+  ]);
   const parsed = z.string().trim().min(2).max(150).safeParse(data.get("name"));
   if (!parsed.success)
     return {

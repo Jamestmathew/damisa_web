@@ -5,7 +5,9 @@ import { getOffices } from "@/modules/super-admin/features/offices/services/offi
 
 import type { SuperAdminDashboardData } from "../types";
 
-export async function getSuperAdminDashboardData(founderName: string): Promise<SuperAdminDashboardData> {
+export async function getSuperAdminDashboardData(
+  founderName: string,
+): Promise<SuperAdminDashboardData> {
   const [admins, offices] = await Promise.all([getAdmins(), getOffices()]);
 
   const totalStudents = offices.reduce((sum, o) => sum + o.totalStudents, 0);
@@ -15,10 +17,44 @@ export async function getSuperAdminDashboardData(founderName: string): Promise<S
   return {
     founderFirstName: founderName.split(" ")[0] ?? founderName,
     stats: [
-      { label: "Admins", value: String(admins.length), hint: `${activeAdmins} active`, icon: "admins" },
-      { label: "Offices", value: String(offices.length), hint: `${offices.filter((o) => o.adminId).length} assigned`, icon: "offices" },
-      { label: "Total Students", value: totalStudents.toLocaleString(), hint: "Across all offices", icon: "students" },
-      { label: "Total Revenue", value: `₦${(totalRevenue / 1_000_000).toFixed(1)}M`, hint: "Across all offices", icon: "revenue" },
+      {
+        label: "Admins",
+        value: String(admins.length),
+        hint: `${activeAdmins} active`,
+        icon: "admins",
+      },
+      {
+        label: "Offices",
+        value: String(offices.length),
+        hint: `${offices.filter((o) => o.adminId).length} assigned`,
+        icon: "offices",
+      },
+      {
+        label: "Total Students",
+        value: totalStudents.toLocaleString(),
+        hint: "Across all offices",
+        icon: "students",
+      },
+      {
+        label: "Total Staff",
+        value: String(offices.reduce((sum, o) => sum + (o.totalStaff ?? 0), 0)),
+        hint: "Admins and tutors, including interns",
+        icon: "admins",
+      },
+      {
+        label: "Intern Staff",
+        value: String(
+          offices.reduce((sum, o) => sum + (o.totalInterns ?? 0), 0),
+        ),
+        hint: "Included in total staff",
+        icon: "students",
+      },
+      {
+        label: "Total Revenue",
+        value: `₦${totalRevenue.toLocaleString("en-NG")}`,
+        hint: "Across all offices",
+        icon: "revenue",
+      },
     ],
   };
 }

@@ -20,21 +20,10 @@ export const studentNavConfig: StudentNavItem[] = [
     matchPrefix: true,
   },
   {
-    label: "Assignments",
+    label: "Assignments & Projects",
     href: STUDENT_ROUTES.assignments,
     icon: "assignments",
     matchPrefix: true,
-  },
-  {
-    label: "Quizzes",
-    href: STUDENT_ROUTES.quizzes,
-    icon: "quizzes",
-    matchPrefix: true,
-  },
-  {
-    label: "Exams",
-    href: STUDENT_ROUTES.exams,
-    icon: "exams",
   },
   {
     label: "Grades",
@@ -46,11 +35,6 @@ export const studentNavConfig: StudentNavItem[] = [
     label: "Attendance",
     href: STUDENT_ROUTES.attendance,
     icon: "attendance",
-  },
-  {
-    label: "Timetable",
-    href: STUDENT_ROUTES.timetable,
-    icon: "timetable",
   },
   {
     label: "Certificates",
@@ -71,10 +55,5 @@ export const studentNavConfig: StudentNavItem[] = [
     label: "Settings",
     href: STUDENT_ROUTES.settings,
     icon: "settings",
-  },
-  {
-    label: "Change password",
-    href: "/settings/change-password",
-    icon: "shield",
   },
 ];

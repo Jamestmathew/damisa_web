@@ -60,6 +60,7 @@ export function AssignmentFormDialog({
     defaultValues: assignment
       ? {
           id: assignment.id,
+          workType: assignment.workType ?? "assignment",
           courseId: assignment.courseId,
           title: assignment.title,
           instructions: assignment.instructions ?? assignment.title,
@@ -71,6 +72,7 @@ export function AssignmentFormDialog({
       : {
           courseId: courseOptions[0]?.id ?? "",
           title: "",
+          workType: "assignment",
           instructions: "",
           dueAt: "",
           maxScore: 20,
@@ -84,6 +86,7 @@ export function AssignmentFormDialog({
       if (values.id) formData.set("id", values.id);
       formData.set("courseId", values.courseId);
       formData.set("title", values.title);
+      formData.set("workType", values.workType);
       formData.set("instructions", values.instructions);
       formData.set("dueAt", values.dueAt);
       formData.set("maxScore", String(values.maxScore));
@@ -138,6 +141,25 @@ export function AssignmentFormDialog({
             className="space-y-4"
             noValidate
           >
+            <FormField
+              control={form.control}
+              name="workType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Work type</FormLabel>
+                  <FormControl>
+                    <select
+                      {...field}
+                      className="h-10 w-full rounded-md border bg-background px-3"
+                    >
+                      <option value="assignment">Assignment</option>
+                      <option value="project">Project</option>
+                    </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="courseId"

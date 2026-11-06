@@ -31,14 +31,17 @@ export function StudentMobileNav() {
           <Menu className="size-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="brand-sidebar w-64 p-0">
-        <SheetHeader className="border-b border-border px-4 py-3">
+      <SheetContent
+        side="left"
+        className="brand-sidebar flex h-dvh w-[min(20rem,85vw)] flex-col gap-0 overflow-hidden p-0"
+      >
+        <SheetHeader className="shrink-0 border-b border-border px-4 py-3 pr-12">
           <SheetTitle className="flex items-center gap-2 text-sm">
             <BrandLogo size={34} />
             Student Portal
           </SheetTitle>
         </SheetHeader>
-        <div className="py-3">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <SidebarNav
             items={studentNavConfig}
             onNavigate={() => setOpen(false)}

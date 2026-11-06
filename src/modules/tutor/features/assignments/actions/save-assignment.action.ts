@@ -24,6 +24,7 @@ export async function saveAssignmentAction(
       id: formData.get("id") || undefined,
       courseId: formData.get("courseId"),
       title: formData.get("title"),
+      workType: formData.get("workType") ?? "assignment",
       instructions: formData.get("instructions"),
       dueAt: formData.get("dueAt"),
       maxScore: formData.get("maxScore"),

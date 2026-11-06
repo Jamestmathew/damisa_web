@@ -1,5 +1,4 @@
-import { AccountNameForm } from "@/shared/account/account-name-form";
-import { ProfilePictureForm } from "@/shared/account/profile-picture-form";
+import { AccountSettings } from "@/shared/account/account-settings";
 import type { Metadata } from "next";
 
 import { PageHeader } from "@/shared/components";
@@ -10,7 +9,6 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { ChangePasswordForm } from "@/modules/auth";
 import {
   getTutorPreferences,
   NotificationPreferencesForm,
@@ -28,19 +26,7 @@ export default async function TutorSettingsPage() {
         description="Manage your account and notification preferences"
       />
 
-      <ProfilePictureForm />
-      <AccountNameForm />
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Change password</CardTitle>
-          <CardDescription>
-            Update the password used to sign in.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChangePasswordForm />
-        </CardContent>
-      </Card>
+      <AccountSettings />
 
       <Card>
         <CardHeader>

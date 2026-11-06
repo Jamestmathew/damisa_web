@@ -45,6 +45,9 @@ export async function saveAnnouncementAction(
     if (!result.ok) return { ok: false, error: result.error };
 
     revalidatePath(ADMIN_ROUTES.announcements);
+    revalidatePath("/student/announcements");
+    revalidatePath("/tutor/announcements");
+    revalidatePath("/tutor/dashboard");
 
     return {
       ok: true,

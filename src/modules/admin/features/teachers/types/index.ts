@@ -1,6 +1,8 @@
 import type { UserStatus } from "@/modules/admin/shared/types";
 
 export interface AdminTeacher {
+  staffId: string | null;
+  staffType?: "staff" | "intern";
   id: string;
   name: string;
   email: string;

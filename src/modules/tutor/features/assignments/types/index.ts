@@ -4,6 +4,7 @@ export interface TutorAssignment {
   courseId: string;
   courseCode: string;
   title: string;
+  workType?: "assignment" | "project";
   dueAt: string;
   instructions?: string;
   maxScore: number;

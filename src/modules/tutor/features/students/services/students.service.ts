@@ -17,7 +17,7 @@ export async function getTutorStudents(): Promise<TutorStudent[]> {
       "attendance",
     ),
   ]);
-  return people.flatMap((p) =>
+  const rows = people.flatMap((p) =>
     courses
       .filter((c) =>
         classes.some(
@@ -59,4 +59,19 @@ export async function getTutorStudents(): Promise<TutorStudent[]> {
           : 0,
       })),
   );
+  return [
+    ...rows,
+    ...people
+      .filter((p) => !rows.some((row) => row.id.startsWith(`${p.id}:`)))
+      .map((p) => ({
+        id: `${p.id}:assigned`,
+        name: p.name,
+        email: p.email,
+        courseTitle: "Assigned to you · no course yet",
+        courseCode: "—",
+        progressPercent: 0,
+        averageGrade: 0,
+        attendancePercent: 0,
+      })),
+  ];
 }

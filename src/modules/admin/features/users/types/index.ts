@@ -27,6 +27,7 @@ export type AdminUserRow = Omit<
   "role"
 > & {
   role: AdminCreatableRole;
+  staffType?: "staff" | "intern";
 };
 
 export type UserActionResult =

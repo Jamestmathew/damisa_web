@@ -1,4 +1,7 @@
-import { ChangePasswordForm } from "@/modules/auth";
+import Link from "next/link";
+import type { Metadata } from "next";
+import { AccountSettings } from "@/shared/account/account-settings";
+import { PageHeader } from "@/shared/components";
 import {
   Card,
   CardHeader,
@@ -6,37 +9,48 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import type { Metadata } from "next";
-
-import { PageHeader } from "@/shared/components";
 import {
   getSystemSettings,
   SystemSettingsForm,
 } from "@/modules/admin/features/settings";
-
+import {
+  getTutorPreferences,
+  NotificationPreferencesForm,
+} from "@/modules/tutor/features/settings";
 export const metadata: Metadata = { title: "Settings" };
-
 export default async function AdminSettingsPage() {
-  const settings = await getSystemSettings();
-
+  const [settings, preferences] = await Promise.all([
+    getSystemSettings(),
+    getTutorPreferences(),
+  ]);
   return (
     <div className="max-w-2xl space-y-6">
       <PageHeader
-        title="System Settings"
-        description="Institution-wide configuration"
+        title="Settings"
+        description="Manage your account, preferences and institution settings"
       />
-      <SystemSettingsForm settings={settings} />
+      <AccountSettings />
+      <Link
+        href="/admin/my-attendance"
+        className="block rounded-lg border bg-card p-4 font-medium text-primary"
+      >
+        My attendance: clock in / out
+      </Link>
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Change your password</CardTitle>
+          <CardTitle className="text-base">Notifications</CardTitle>
           <CardDescription>
-            Update the password used for your Admin account.
+            Choose your notification preferences.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ChangePasswordForm />
+          <NotificationPreferencesForm preferences={preferences} />
         </CardContent>
       </Card>
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">Institution settings</h2>
+        <SystemSettingsForm settings={settings} />
+      </section>
     </div>
   );
 }

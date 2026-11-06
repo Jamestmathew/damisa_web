@@ -42,6 +42,7 @@ import type { AdminUserRow, UserActionResult } from "../types";
 interface UserFormDialogProps {
   trigger: ReactNode;
   user?: AdminUserRow;
+  initialRole?: "student" | "tutor";
   onSaved: () => void;
 }
 
@@ -88,6 +89,7 @@ function TemporaryCredentialNotice({ password }: { password: string }) {
 export function UserFormDialog({
   trigger,
   user,
+  initialRole,
   onSaved,
 }: UserFormDialogProps) {
   const [open, setOpen] = useState(false);
@@ -101,15 +103,19 @@ export function UserFormDialog({
       ? {
           id: user.id,
           name: user.name,
-          email: user.email.endsWith("@students.local") ? "" : user.email,
+          email: /@students\.(local|invalid)$/.test(user.email)
+            ? ""
+            : user.email,
           role: user.role,
+          staffType: user.staffType ?? "staff",
           matricNumber: user.matricNumber ?? "",
           staffId: user.staffId ?? "",
         }
       : {
           name: "",
           email: "",
-          role: "student",
+          role: initialRole ?? "student",
+          staffType: "staff",
           matricNumber: "",
           staffId: "",
         },
@@ -129,6 +135,7 @@ export function UserFormDialog({
 
       formData.set("name", values.name);
       formData.set("role", values.role);
+      formData.set("staffType", values.staffType ?? "staff");
 
       if (values.email) {
         formData.set("email", values.email);
@@ -182,7 +189,15 @@ export function UserFormDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{user ? "Edit user" : "Add user"}</DialogTitle>
+          <DialogTitle>
+            {user
+              ? "Edit user"
+              : initialRole === "student"
+                ? "Add student"
+                : initialRole === "tutor"
+                  ? "Add tutor"
+                  : "Add user"}
+          </DialogTitle>
 
           <DialogDescription>
             {user
@@ -233,7 +248,7 @@ export function UserFormDialog({
                   <Select
                     value={field.value}
                     onValueChange={field.onChange}
-                    disabled={Boolean(user)}
+                    disabled={Boolean(user) || Boolean(initialRole)}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -253,6 +268,27 @@ export function UserFormDialog({
               )}
             />
 
+            {role === "tutor" && (
+              <FormField
+                control={form.control}
+                name="staffType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Staff type</FormLabel>
+                    <FormControl>
+                      <select
+                        {...field}
+                        className="h-10 w-full rounded-md border bg-background px-3"
+                      >
+                        <option value="staff">Staff / instructor</option>
+                        <option value="intern">Intern staff</option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             {/* Email */}
             <FormField
               control={form.control}
@@ -282,11 +318,7 @@ export function UserFormDialog({
                     <FormLabel>Matric number</FormLabel>
 
                     <FormControl>
-                      <Input
-                        placeholder="e.g. CSC/2023/001"
-                        {...field}
-                        disabled={Boolean(user)}
-                      />
+                      <Input placeholder="e.g. CSC/2023/001" {...field} />
                     </FormControl>
 
                     <FormMessage />
@@ -317,9 +349,16 @@ export function UserFormDialog({
               type="submit"
               className="w-full"
               isLoading={isPending}
+              disabled={Boolean(state?.ok && state.temporaryPassword)}
               loadingText="Saving..."
             >
-              {user ? "Save changes" : "Create user"}
+              {user
+                ? "Save changes"
+                : initialRole === "student"
+                  ? "Create student"
+                  : initialRole === "tutor"
+                    ? "Create tutor"
+                    : "Create user"}
             </LoadingButton>
           </form>
         </Form>

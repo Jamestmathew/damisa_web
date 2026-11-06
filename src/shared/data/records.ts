@@ -1,4 +1,5 @@
 import "server-only";
+import { enrollmentCourseIds, type TutorEnrollment } from "./tutor-enrollment";
 import { cacheRequest as cache } from "@/shared/security/request-cache";
 import { collectRows } from "./pagination";
 import { createAdminClient } from "@/supabase/admin";
@@ -160,6 +161,30 @@ async function readVisibleRows<T>(kind: Kind): Promise<Row<T>[]> {
         payload(r).audience === `${user.role}s` ||
         user.role === "admin",
     );
+  if (
+    kind === "class" &&
+    rows.some((row) => payload(row).type === "tutor_assignment")
+  ) {
+    const { data: courses, error } = await createAdminClient()
+      .from("lms_records")
+      .select("id,payload")
+      .eq("office_id", officeId)
+      .eq("kind", "course");
+    if (error) throw new Error("Unable to load assigned courses.");
+    rows = rows.map((row) => ({
+      ...row,
+      payload: {
+        ...row.payload,
+        courseIds: enrollmentCourseIds(
+          payload(row) as TutorEnrollment,
+          (courses ?? []).map((course) => ({
+            id: course.id,
+            instructorId: course.payload.instructorId,
+          })),
+        ),
+      },
+    }));
+  }
   if (user.role === "student") {
     if (
       ["department", "admission", "system_settings", "activity_log"].includes(
@@ -167,10 +192,11 @@ async function readVisibleRows<T>(kind: Kind): Promise<Row<T>[]> {
       )
     )
       return [];
-    if (kind === "class")
+    if (kind === "class") {
       rows = rows.filter((r) =>
         (payload(r).studentIds as string[] | undefined)?.includes(user.id),
       );
+    }
     if (kind === "course") {
       const classes = await visibleRows<{
         studentIds: string[];
@@ -227,11 +253,23 @@ async function readVisibleRows<T>(kind: Kind): Promise<Row<T>[]> {
   }
   if (user.role === "tutor" && kind === "class") {
     const courses = new Set((await visibleRows("course")).map((c) => c.id));
-    rows = rows.filter((r) =>
-      (payload(r).courseIds as string[] | undefined)?.some((id) =>
-        courses.has(id),
-      ),
+    rows = rows.filter(
+      (r) =>
+        payload(r).tutorId === user.id ||
+        (payload(r).courseIds as string[] | undefined)?.some((id) =>
+          courses.has(id),
+        ),
     );
+    rows = rows.map((row) => ({
+      ...row,
+      payload: {
+        ...row.payload,
+        courseIds: enrollmentCourseIds(
+          payload(row) as TutorEnrollment,
+          [...courses].map((id) => ({ id, instructorId: user.id })),
+        ),
+      },
+    }));
   }
   return rows;
 }

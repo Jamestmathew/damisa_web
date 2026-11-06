@@ -8,6 +8,8 @@ export async function getTeachers(): Promise<AdminTeacher[]> {
   return (await getOfficePeople(true, "tutor"))
     .filter((p) => p.role === "tutor")
     .map((p) => ({
+      staffId: p.staff_id,
+      staffType: p.staffType,
       id: p.id,
       name: p.name,
       email: p.email,

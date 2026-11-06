@@ -29,6 +29,7 @@ export async function getSubmissionsByAssignment(assignmentId: string) {
 export async function createAssignment(input: {
   courseId: string;
   title: string;
+  workType?: "assignment" | "project";
   dueAt: string;
   maxScore: number;
   instructions?: string;
@@ -51,6 +52,7 @@ export async function updateAssignment(
   id: string,
   input: {
     title: string;
+    workType?: "assignment" | "project";
     dueAt: string;
     maxScore: number;
     instructions?: string;

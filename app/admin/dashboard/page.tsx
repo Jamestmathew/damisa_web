@@ -7,10 +7,7 @@ import {
   EnrollmentOverview,
   RevenueOverview,
   ActiveUsersCard,
-  RecentAdmissions,
   RecentPayments,
-  PendingApprovals,
-  RecentActivities,
   AdminAnnouncementsWidget,
   AdminQuickActions,
 } from "@/modules/admin/features/dashboard";
@@ -30,13 +27,13 @@ export default async function AdminDashboardPage() {
         <RevenueOverview points={data.revenueTrend} />
       </div>
 
-      <ActiveUsersCard count={data.activeUsersCount} delta={data.activeUsersDelta} />
+      <ActiveUsersCard
+        count={data.activeUsersCount}
+        delta={data.activeUsersDelta}
+      />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-        <RecentAdmissions admissions={data.recentAdmissions} />
         <RecentPayments payments={data.recentPayments} />
-        <PendingApprovals approvals={data.pendingApprovals} />
-        <RecentActivities activities={data.recentActivities} />
         <AdminAnnouncementsWidget announcements={data.announcements} />
         <AdminQuickActions />
       </div>

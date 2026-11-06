@@ -13,6 +13,7 @@ export interface OfficePerson {
   staff_id: string | null;
   created_at: string;
   email: string;
+  staffType?: "staff" | "intern";
 }
 export async function getOfficePeople(
   includeEmails = false,
@@ -32,12 +33,16 @@ export async function getOfficePeople(
   if (user.role === "tutor") {
     const courses = new Set((await listRecords("course")).map((c) => c.id));
     const classes = await listRecords<{
+      tutorId?: string;
       courseIds?: string[];
       studentIds?: string[];
     }>("class");
     const ids = new Set(
       classes
-        .filter((c) => c.courseIds?.some((id) => courses.has(id)))
+        .filter(
+          (c) =>
+            c.tutorId === user.id || c.courseIds?.some((id) => courses.has(id)),
+        )
         .flatMap((c) => c.studentIds ?? []),
     );
     profiles = profiles.filter((p) => p.role === "student" && ids.has(p.id));
@@ -48,7 +53,14 @@ export async function getOfficePeople(
     profiles.map(async (p) => {
       const { data, error } = await db.auth.admin.getUserById(p.id);
       if (error) throw new Error("Unable to load account details.");
-      return { ...p, email: data.user?.email ?? "" };
+      return {
+        ...p,
+        email: data.user?.email ?? "",
+        staffType:
+          data.user?.user_metadata?.staffType === "intern"
+            ? ("intern" as const)
+            : ("staff" as const),
+      };
     }),
   );
 }

@@ -2,11 +2,7 @@ import "server-only";
 import { listRecords } from "@/shared/data/records";
 import { getCourses } from "@/modules/student/features/courses/services/courses.service";
 import { loadAssessmentMarks } from "@/shared/academic/marks";
-import {
-  calculateResult,
-  DEFAULT_ASSESSMENT_POLICY,
-  letterFor,
-} from "@/shared/academic/grading";
+import { calculateResult, letterFor } from "@/shared/academic/grading";
 import type { GradesOverview, CourseGradeRow } from "../types";
 export { letterFor };
 export async function getGradesOverview(): Promise<GradesOverview> {
@@ -17,8 +13,10 @@ export async function getGradesOverview(): Promise<GradesOverview> {
   ]);
   const rows: CourseGradeRow[] = [];
   const courseSummaries = courses.flatMap((course) => {
-    const own = marks.filter((m) => m.courseId === course.id);
-    const policy = course.assessmentPolicy ?? DEFAULT_ASSESSMENT_POLICY;
+    const own = marks.filter(
+      (m) => m.courseId === course.id && m.source === "assignment",
+    );
+    const policy = { caWeight: 100, examWeight: 0 };
     const result = calculateResult(own, policy);
     const override = overrides.find((o) => o.courseId === course.id);
     if (result.overallPercent === null && !override) return [];

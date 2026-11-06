@@ -26,6 +26,8 @@ export async function gradeSubmissionAction(
 
   if (result.ok) {
     revalidatePath(TUTOR_ROUTES.assignmentSubmissions(assignmentId));
+    revalidatePath("/student/assignments");
+    revalidatePath("/student/grades");
   }
 
   return result;

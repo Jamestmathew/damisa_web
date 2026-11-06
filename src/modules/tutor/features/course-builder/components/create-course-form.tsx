@@ -16,17 +16,30 @@ import {
 } from "@/components/ui/form";
 import { LoadingButton, FormStatusMessage } from "@/modules/auth/components/ui";
 
+import { updateCourseDetailsAction } from "../actions/manage-course.action";
 import { createCourseAction } from "../actions/create-course.action";
-import { createCourseSchema, type CreateCourseSchema } from "../validation/course-builder.schema";
+import {
+  createCourseSchema,
+  type CreateCourseSchema,
+} from "../validation/course-builder.schema";
 import type { CourseBuilderActionResult } from "../actions/create-course.action";
 
-export function CreateCourseForm() {
+export function CreateCourseForm({
+  course,
+}: {
+  course?: CreateCourseSchema & { id: string };
+}) {
   const [isPending, startTransition] = useTransition();
   const [state, setState] = useState<CourseBuilderActionResult | null>(null);
 
   const form = useForm<CreateCourseSchema>({
     resolver: zodResolver(createCourseSchema),
-    defaultValues: { title: "", code: "", description: "", creditUnits: 3 },
+    defaultValues: course ?? {
+      title: "",
+      code: "",
+      description: "",
+      creditUnits: 3,
+    },
   });
 
   function onSubmit(values: CreateCourseSchema) {
@@ -38,12 +51,16 @@ export function CreateCourseForm() {
       formData.set("description", values.description);
       formData.set("creditUnits", String(values.creditUnits));
 
-      const result = await createCourseAction(null, formData);
+      if (course) formData.set("id", course.id);
+      const result = await (
+        course ? updateCourseDetailsAction : createCourseAction
+      )(null, formData);
       setState(result);
 
       if (result && !result.ok && result.fieldErrors) {
         for (const [field, message] of Object.entries(result.fieldErrors)) {
-          if (message) form.setError(field as keyof CreateCourseSchema, { message });
+          if (message)
+            form.setError(field as keyof CreateCourseSchema, { message });
         }
       }
     });
@@ -51,9 +68,18 @@ export function CreateCourseForm() {
 
   return (
     <Form {...form}>
-      {state && !state.ok ? <FormStatusMessage variant="error" message={state.error} /> : null}
+      {state ? (
+        <FormStatusMessage
+          variant={state.ok ? "success" : "error"}
+          message={state.ok ? state.message : state.error}
+        />
+      ) : null}
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4"
+        noValidate
+      >
         <FormField
           control={form.control}
           name="title"
@@ -111,8 +137,12 @@ export function CreateCourseForm() {
           )}
         />
 
-        <LoadingButton type="submit" isLoading={isPending} loadingText="Creating course...">
-          Create course
+        <LoadingButton
+          type="submit"
+          isLoading={isPending}
+          loadingText="Creating course..."
+        >
+          {course ? "Save course details" : "Create course"}
         </LoadingButton>
       </form>
     </Form>

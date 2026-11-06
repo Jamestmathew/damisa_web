@@ -57,6 +57,7 @@ export async function getAdmins(): Promise<AdminRow[]> {
         createdAt: profile.created_at,
         officeId: profile.office_id,
         officeName: office?.name ?? null,
+        officeState: account.data.user?.user_metadata?.officeState ?? "",
       };
     }),
   );
@@ -67,6 +68,7 @@ export async function createAdmin(input: {
   email: string;
   staffId: string;
   officeName?: string;
+  officeState?: string;
 }): Promise<
   | { ok: true; temporaryPassword: string }
   | {
@@ -105,6 +107,7 @@ export async function createAdmin(input: {
     user_metadata: {
       name: input.name,
       staff_id: input.staffId,
+      officeState: input.officeState ?? "",
     },
   });
 
@@ -119,7 +122,8 @@ export async function createAdmin(input: {
 
   const { error: profileError } = await supabase
     .from("profiles")
-    .update({
+    .upsert({
+      id: userId,
       name: input.name,
       role: "admin",
       status: "active",
@@ -127,7 +131,6 @@ export async function createAdmin(input: {
       office_id: officeId ?? null,
       updated_at: new Date().toISOString(),
     })
-    .eq("id", userId)
     .select("id")
     .single();
 
@@ -152,6 +155,7 @@ export async function updateAdmin(
     email: string;
     staffId: string;
     officeName?: string;
+    officeState?: string;
   },
 ): Promise<
   | { ok: true }
@@ -171,6 +175,7 @@ export async function updateAdmin(
     user_metadata: {
       name: input.name,
       staff_id: input.staffId,
+      officeState: input.officeState ?? "",
     },
   });
 

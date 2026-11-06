@@ -9,6 +9,7 @@ export const adminFormSchema = z.object({
 
   staffId: z.string().trim().min(2, "Staff ID is required"),
 
+  officeState: z.string().trim().max(100).optional(),
   officeName: z.string().trim().optional(),
 });
 

@@ -45,11 +45,6 @@ export async function getAdminDashboardData(
         value: `₦${revenue.toLocaleString()}`,
         icon: "revenue",
       },
-      {
-        label: "Pending Admissions",
-        value: String(admissions.filter((a) => a.status === "pending").length),
-        icon: "admissions",
-      },
     ],
     enrollmentTrend: recentMonths().map((month) => ({
       month: month.label,

@@ -1,4 +1,4 @@
-import { DataBarChart } from "@/shared/charts/bar-chart";
+import { TrendChart } from "@/shared/charts/trend-chart";
 import { monthOf, recentMonths } from "@/shared/charts/monthly";
 import { getOfficePeople } from "@/shared/data/people";
 import { listRecords } from "@/shared/data/records";
@@ -30,14 +30,13 @@ export default async function FinancePage() {
     <div>
       <PageHeader
         title="Finance"
-        description="Manually record and review each company’s earnings"
+        description="Record company income here. These records are reported automatically to Super Admin."
       />
       <div className="mb-6">
-        <DataBarChart
+        <TrendChart
           title="Monthly recorded income"
           description="Confirmed manual income over the last six months, by date earned"
           format="naira"
-          tone="orange"
           points={recentMonths().map((month) => ({
             label: month.label,
             value: payments

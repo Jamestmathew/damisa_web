@@ -1,6 +1,7 @@
 "use server";
 import { authorizeAction } from "@/shared/security/action";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requirePermission } from "@/shared/rbac";
@@ -46,5 +47,6 @@ export async function createCourseAction(
     return { ok: false, error: result.error };
   }
 
+  revalidatePath("/", "layout");
   redirect(TUTOR_ROUTES.courseBuilder(result.course.id));
 }

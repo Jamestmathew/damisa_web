@@ -17,7 +17,11 @@ export async function saveAttendanceAction(
 
   const result = await saveAttendance(courseId, marks);
 
-  if (result.ok) revalidatePath(TUTOR_ROUTES.attendance);
+  if (result.ok) {
+    revalidatePath(TUTOR_ROUTES.attendance);
+    revalidatePath("/admin/attendance");
+    revalidatePath("/student/attendance");
+  }
 
   return result;
 }

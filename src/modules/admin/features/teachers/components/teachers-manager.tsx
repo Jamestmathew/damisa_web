@@ -1,5 +1,6 @@
 "use client";
 
+import { UserFormDialog } from "@/modules/admin/features/users/components/user-form-dialog";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Presentation, Ban, CheckCircle2 } from "lucide-react";
@@ -23,14 +24,14 @@ export function TeachersManager({ teachers }: { teachers: AdminTeacher[] }) {
       (teacher) =>
         teacher.name.toLowerCase().includes(q) ||
         teacher.email.toLowerCase().includes(q) ||
-        teacher.department.toLowerCase().includes(q)
+        teacher.department.toLowerCase().includes(q),
     );
   }, [teachers, query]);
 
   const columns: DataTableColumn<AdminTeacher>[] = [
     {
       key: "name",
-      header: "Teacher",
+      header: "Staff member",
       render: (teacher) => (
         <div>
           <p className="font-medium text-foreground">{teacher.name}</p>
@@ -38,19 +39,55 @@ export function TeachersManager({ teachers }: { teachers: AdminTeacher[] }) {
         </div>
       ),
     },
-    { key: "department", header: "Department", render: (teacher) => teacher.department },
-    { key: "courses", header: "Courses", render: (teacher) => teacher.coursesAssigned },
-    { key: "status", header: "Status", render: (teacher) => <UserStatusBadge status={teacher.status} /> },
+    {
+      key: "staffType",
+      header: "Staff type",
+      render: (teacher) =>
+        teacher.staffType === "intern" ? "Intern" : "Instructor",
+    },
+    {
+      key: "courses",
+      header: "Courses",
+      render: (teacher) => teacher.coursesAssigned,
+    },
+    {
+      key: "status",
+      header: "Status",
+      render: (teacher) => <UserStatusBadge status={teacher.status} />,
+    },
     {
       key: "actions",
       header: "",
       className: "text-right",
       render: (teacher) => (
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-1">
+          <UserFormDialog
+            user={{
+              id: teacher.id,
+              name: teacher.name,
+              email: teacher.email,
+              role: "tutor",
+              status: teacher.status,
+              matricNumber: null,
+              staffId: teacher.staffId,
+              staffType: teacher.staffType,
+              createdAt: teacher.joinedAt,
+            }}
+            trigger={
+              <Button variant="outline" size="sm">
+                Edit
+              </Button>
+            }
+            onSaved={() => router.refresh()}
+          />
           {teacher.status === "suspended" ? (
             <ConfirmDialog
               trigger={
-                <Button variant="ghost" size="icon" aria-label={`Reactivate ${teacher.name}`}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Reactivate ${teacher.name}`}
+                >
                   <CheckCircle2 className="size-4 text-success" />
                 </Button>
               }
@@ -65,7 +102,11 @@ export function TeachersManager({ teachers }: { teachers: AdminTeacher[] }) {
           ) : (
             <ConfirmDialog
               trigger={
-                <Button variant="ghost" size="icon" aria-label={`Suspend ${teacher.name}`}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Suspend ${teacher.name}`}
+                >
                   <Ban className="size-4 text-destructive" />
                 </Button>
               }
@@ -85,7 +126,18 @@ export function TeachersManager({ teachers }: { teachers: AdminTeacher[] }) {
 
   return (
     <div>
-      <EntityToolbar searchValue={query} onSearchChange={setQuery} searchPlaceholder="Search teachers..." />
+      <EntityToolbar
+        searchValue={query}
+        onSearchChange={setQuery}
+        searchPlaceholder="Search teachers..."
+        action={
+          <UserFormDialog
+            initialRole="tutor"
+            trigger={<Button>Add tutor</Button>}
+            onSaved={() => router.refresh()}
+          />
+        }
+      />
       <DataTable
         columns={columns}
         rows={filtered}

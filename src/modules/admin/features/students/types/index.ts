@@ -1,6 +1,7 @@
 import type { UserStatus } from "@/modules/admin/shared/types";
 
 export interface AdminStudent {
+  matricNumber: string | null;
   id: string;
   name: string;
   email: string;

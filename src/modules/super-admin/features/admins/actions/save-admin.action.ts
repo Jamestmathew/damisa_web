@@ -22,6 +22,7 @@ export async function saveAdminAction(
       name: formData.get("name"),
       email: formData.get("email"),
       staffId: formData.get("staffId"),
+      officeState: formData.get("officeState") || "",
       officeName: formData.get("officeName") || undefined,
     });
 
@@ -54,6 +55,8 @@ export async function saveAdminAction(
       }
 
       revalidatePath(SUPER_ADMIN_ROUTES.admins);
+      revalidatePath("/super-admin/dashboard");
+      revalidatePath("/super-admin/offices");
 
       return {
         ok: true,
@@ -72,6 +75,8 @@ export async function saveAdminAction(
     }
 
     revalidatePath(SUPER_ADMIN_ROUTES.admins);
+    revalidatePath("/super-admin/dashboard");
+    revalidatePath("/super-admin/offices");
 
     return {
       ok: true,

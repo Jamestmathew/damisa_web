@@ -96,12 +96,14 @@ export function AdminFormDialog({
           email: admin.email,
           staffId: admin.staffId ?? "",
           officeName: admin.officeName ?? "",
+          officeState: admin.officeState ?? "",
         }
       : {
           name: "",
           email: "",
           staffId: "",
           officeName: "",
+          officeState: "",
         },
   });
 
@@ -118,6 +120,7 @@ export function AdminFormDialog({
       formData.set("name", values.name);
       formData.set("email", values.email);
       formData.set("staffId", values.staffId);
+      formData.set("officeState", values.officeState ?? "");
 
       if (values.officeName) {
         formData.set("officeName", values.officeName);
@@ -236,6 +239,19 @@ export function AdminFormDialog({
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="officeState"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Company / branch state</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. Lagos, Ogun, Kaduna" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="officeName"

@@ -15,8 +15,8 @@ export default async function OfficesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Offices"
-        description="Revenue and enrollment totals per office"
+        title="Companies / Branches"
+        description="Company income, student and workforce totals across states"
       />
       <OfficesDashboard offices={offices} />
       <section aria-label="Office details" className="space-y-3">

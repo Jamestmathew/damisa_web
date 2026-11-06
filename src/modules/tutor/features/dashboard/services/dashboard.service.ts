@@ -1,3 +1,4 @@
+import { getStaffAnnouncements } from "@/shared/data/admin-announcements";
 import "server-only";
 import { listRecords } from "@/shared/data/records";
 import { getTutorCourses } from "@/modules/tutor/features/courses/services/courses.service";
@@ -46,8 +47,8 @@ export async function getTutorDashboardData(
         icon: "pending",
       },
       {
-        label: "Active Quizzes",
-        value: String(quizzes.length),
+        label: "Assignments & Projects",
+        value: String(assignments.length),
         icon: "quizzes",
       },
     ],
@@ -88,6 +89,6 @@ export async function getTutorDashboardData(
             100,
         )
       : 0,
-    announcements,
+    announcements: [...(await getStaffAnnouncements()), ...announcements],
   };
 }

@@ -32,7 +32,7 @@ export async function createAnnouncement(input: {
       title: input.title,
       body: input.body,
       audience: input.audience,
-      postedAt: "Just now",
+      postedAt: new Date().toISOString(),
     };
     announcements.push(announcement);
 
