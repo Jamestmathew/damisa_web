@@ -27,10 +27,10 @@ test("attendance oversight follows student and staff role boundaries", () => {
   assert.equal(hasPermission("student", "attendance:view_self"), true);
 });
 
-test("only Tutors and Admins can clock their own attendance", () => {
+test("Students, Tutors and Admins can sign their own attendance", () => {
   assert.equal(hasPermission("tutor", "attendance:clock_self"), true);
   assert.equal(hasPermission("admin", "attendance:clock_self"), true);
-  assert.equal(hasPermission("student", "attendance:clock_self"), false);
+  assert.equal(hasPermission("student", "attendance:clock_self"), true);
   assert.equal(hasPermission("super_admin", "attendance:clock_self"), false);
 });
 

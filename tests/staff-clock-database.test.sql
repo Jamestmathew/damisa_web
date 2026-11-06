@@ -23,9 +23,12 @@ begin
  -- Keep local fixture time before noon regardless of when CI runs.
  tz:=case when extract(hour from clock_timestamp() at time zone 'UTC')<12 then 'UTC' else 'Etc/GMT+12' end;
  local_date:=(clock_timestamp() at time zone tz)::date;
- policy:=jsonb_build_object('timezone',tz,'studentStart','00:00','studentGrace',0,'staffStart','00:00','staffGrace',0,'closingTime','23:59','weekdays','[0,1,2,3,4,5,6]'::jsonb,'dateOverrides','{}'::jsonb);
+ policy:=jsonb_build_object('timezone',tz,'studentStart','23:00','studentGrace',0,'staffStart','00:00','staffGrace',0,'closingTime','23:59','weekdays','[0,1,2,3,4,5,6]'::jsonb,'dateOverrides','{}'::jsonb);
  perform attendance_save_policy(super_id,office,local_date,policy);
- begin perform attendance_self_clock(student_id,'check_in',gen_random_uuid());raise exception 'Student self clock accepted';exception when raise_exception then if sqlerrm='Student self clock accepted' then raise;end if;end;
+ stamp_before:=clock_timestamp();entry:=attendance_self_clock(student_id,'check_in',gen_random_uuid());stamp_after:=clock_timestamp();
+ if not exists(select 1 from attendance_entries e join attendance_days d on d.id=e.day_id where e.id=entry and e.subject_role='student' and d.audience='student' and e.check_in between stamp_before and stamp_after and e.calculated_status='present') then raise exception 'Student clock did not use the database time and student schedule';end if;
+ perform attendance_self_clock(student_id,'check_out',gen_random_uuid());
+ if (select check_out from attendance_entries where id=entry) is null then raise exception 'Student signout missing';end if;
  begin perform attendance_self_clock(super_id,'check_in',gen_random_uuid());raise exception 'Super Admin included';exception when raise_exception then if sqlerrm='Super Admin included' then raise;end if;end;
  begin perform attendance_self_clock(tutor_id,'correct',gen_random_uuid());raise exception 'Self correction accepted';exception when raise_exception then if sqlerrm='Self correction accepted' then raise;end if;end;
  begin perform attendance_self_clock(tutor_id,'check_out',gen_random_uuid());raise exception 'Checkout before arrival accepted';exception when raise_exception then if sqlerrm='Checkout before arrival accepted' then raise;end if;end;
@@ -69,8 +72,7 @@ begin
  update profiles set office_id=office where id=admin_id;
  d:=attendance_open_day(admin_id,office,local_date,'student');
  select id into entry from attendance_entries where day_id=d and subject_id=student_id;
- perform attendance_apply(admin_id,d,entry,'check_in',clock_timestamp(),'Student arrival verified',0,gen_random_uuid());
- perform attendance_review(admin_id,entry,'approved','Student verified',1,gen_random_uuid());
+ perform attendance_review(admin_id,entry,'approved','Student verified',2,gen_random_uuid());
  if (select approval_status from attendance_entries where id=entry)<>'approved' then raise exception 'Admin could not approve Student';end if;
  if exists(select 1 from pg_proc where proname='attendance_self_clock' and ('p_time'=any(proargnames) or 'p_office'=any(proargnames) or 'p_entry'=any(proargnames))) then raise exception 'Self endpoint accepts selectable time, office or target';end if;
 end $$;

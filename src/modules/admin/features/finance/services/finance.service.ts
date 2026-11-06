@@ -1,15 +1,24 @@
+import { requireRole } from "@/shared/rbac";
+import {
+  financialRecordId,
+  getFinancialLedger,
+} from "@/shared/finance/service";
 import "server-only";
 import { getOfficePeople } from "@/shared/data/people";
 import { getSystemSettings } from "@/modules/admin/features/settings/services/settings.service";
-import { listRecords, getRecord, saveRecord } from "@/shared/data/records";
+import { getRecord, saveRecord } from "@/shared/data/records";
 import type { PaymentRecord } from "../types";
 export interface StoredPayment extends PaymentRecord {
   studentId: string | null;
+  receivedByRole?: "admin" | "super_admin";
+  receivedById?: string;
+  originalRecorder?: { id: string; name: string; role: string };
+  studentName?: string;
   paidAt: string | null;
   earnedOn: string;
 }
 export async function getPayments(): Promise<PaymentRecord[]> {
-  return listRecords<StoredPayment>("payment");
+  return (await getFinancialLedger()).payments;
 }
 export async function recordManualPayment(input: {
   id?: string;
@@ -21,6 +30,13 @@ export async function recordManualPayment(input: {
   reference: string;
   earnedOn: string;
 }) {
+  const actor = await requireRole(["admin"]);
+  if (input.id)
+    return {
+      ok: false as const,
+      error:
+        "Recorded receipts are read-only. Existing payments cannot be overwritten.",
+    };
   if (!(await getSystemSettings()).allowManualPaymentRecording)
     return {
       ok: false as const,
@@ -57,7 +73,11 @@ export async function recordManualPayment(input: {
     {
       ...existing,
       ...details,
-      id: existing?.id ?? "",
+      id: financialRecordId("payment", actor.officeId!, input.reference),
+      receivedByRole: "admin",
+      receivedById: actor.id,
+      originalRecorder: { id: actor.id, name: actor.name, role: actor.role },
+      studentName: student?.name,
       payerName: input.payerName.trim(),
       payerEmail: input.payerEmail.trim(),
       studentId: student?.id ?? null,
@@ -72,6 +92,13 @@ export async function recordManualPayment(input: {
   return { ok: true as const, payment };
 }
 export async function verifyPayment(id: string) {
+  const actor = await requireRole(["admin"]);
+  const owned = (await getPayments()).find((p) => p.id === id);
+  if (!owned || !("recordOwnerId" in owned) || owned.recordOwnerId !== actor.id)
+    return {
+      ok: false as const,
+      error: "Another person’s receipt is read-only.",
+    };
   const payment = await getRecord<StoredPayment>("payment", id);
   if (!payment)
     return { ok: false as const, error: "Income record not found." };

@@ -17,12 +17,10 @@ export async function OwnAttendanceHistory() {
   );
   return (
     <section className="space-y-4">
-      {user.role !== "student" ? (
-        <StaffSelfClock
-          checkedIn={!!todayEntry?.check_in}
-          checkedOut={!!todayEntry?.check_out}
-        />
-      ) : null}
+      <StaffSelfClock
+        checkedIn={!!todayEntry?.check_in}
+        checkedOut={!!todayEntry?.check_out}
+      />
       <h2 className="text-xl font-semibold">Daily arrival attendance</h2>
       <p className="text-sm text-muted-foreground">
         Your arrival and departure records. Excuses are shown separately from

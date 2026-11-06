@@ -190,6 +190,12 @@ function row(id, kind, payload, owner = "tutor-a", office = "office-a") {
   return { id, kind, payload, owner_id: owner, office_id: office, revision: 1 };
 }
 const fixtures = [
+  row("selection", "class", {
+    type: "course_enrollment",
+    tutorId: "tutor-a",
+    courseIds: ["course-a"],
+    studentIds: ["student-a"],
+  }),
   row(
     "link",
     "class",
@@ -245,7 +251,7 @@ test("tutor assignment reveals only assigned published courses and their assignm
     ["assignment"],
   );
 });
-test("newly created tutor courses become available without editing enrollment", async () => {
+test("new courses stay private until the tutor selects the student", async () => {
   await reset();
   state.rows.push(
     row("new-course", "course", {
@@ -255,18 +261,18 @@ test("newly created tutor courses become available without editing enrollment", 
   );
   assert.deepEqual(
     (await records.listRecords("course")).map((r) => r.id),
-    ["course-a", "new-course"],
+    ["course-a"],
   );
 });
 test("reassigning or removing tutor removes access through that assignment", async () => {
   await reset();
-  state.rows[0].payload.tutorId = "tutor-b";
+  state.rows.find((r) => r.id === "link").payload.tutorId = "tutor-b";
   assert.deepEqual(
     (await records.listRecords("course")).map((r) => r.id),
-    ["course-b"],
+    [],
   );
   await records.invalidateRecordCache();
-  state.rows[0].payload.tutorId = "";
+  state.rows.find((r) => r.id === "link").payload.tutorId = "";
   assert.equal((await records.listRecords("course")).length, 0);
 });
 test("tutors cannot see another tutor's courses or edit enrollment", async () => {
@@ -281,7 +287,6 @@ test("admin enrollment counts resolve current tutor courses too", async () => {
   await reset("admin");
   assert.deepEqual((await records.listRecords("class"))[0].courseIds, [
     "course-a",
-    "draft",
   ]);
 });
 test("student creation provisions an active office profile without relying on an auth trigger", async () => {
@@ -500,4 +505,44 @@ test("Admin can classify an intern while preserving tutor-level permissions", as
   assert.equal(result.ok, true);
   assert.equal(state.created[0].user_metadata.staffType, "intern");
   assert.equal(state.profiles[0].role, "tutor");
+});
+
+test("Tutor may select assigned students for an owned course but cannot edit Admin relationships", async () => {
+  await reset("tutor");
+  await records.saveRecord("class", {
+    type: "course_enrollment",
+    tutorId: "tutor-a",
+    courseIds: ["course-a"],
+    studentIds: ["student-a"],
+  });
+  await assert.rejects(
+    records.saveRecord("class", {
+      type: "course_enrollment",
+      tutorId: "tutor-a",
+      courseIds: ["course-b"],
+      studentIds: ["student-a"],
+    }),
+    /courses/,
+  );
+  await assert.rejects(
+    records.saveRecord("class", {
+      type: "course_enrollment",
+      tutorId: "tutor-a",
+      courseIds: ["course-a"],
+      studentIds: ["unassigned-student"],
+    }),
+    /assigned/,
+  );
+  await assert.rejects(
+    records.saveRecord(
+      "class",
+      {
+        type: "tutor_assignment",
+        tutorId: "tutor-a",
+        studentIds: ["student-a"],
+      },
+      "link",
+    ),
+    /own course/,
+  );
 });

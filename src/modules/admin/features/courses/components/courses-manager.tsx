@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import Image from "next/image";
 import { AdminCourseDialog } from "./admin-course-dialog";
 import { CourseCoverDialog } from "./course-cover-dialog";
@@ -80,6 +81,11 @@ export function CoursesManager({
       className: "text-right",
       render: (course) => (
         <div className="flex justify-end gap-1">
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/admin/courses/${course.id}`}>
+              Open / Upload files
+            </Link>
+          </Button>
           <CourseCoverDialog id={course.id} />
           {course.status !== "published" ? (
             <ConfirmDialog

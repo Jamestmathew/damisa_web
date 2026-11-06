@@ -20,7 +20,7 @@ export async function deleteAccountAction(
   const db = createAdminClient();
   const { data: target, error } = await db
     .from("profiles")
-    .select("id,role,office_id,avatar_url")
+    .select("id,name,role,office_id,avatar_url")
     .eq("id", id)
     .eq("role", role)
     .maybeSingle();
@@ -29,6 +29,44 @@ export async function deleteAccountAction(
   // Company records survive deletion of the Admin who originally entered them.
   // Repoint audit references before Auth deletion so foreign keys remain valid.
   if (role === "admin") {
+    const finances = await collectRows<{
+      id: string;
+      payload: Record<string, unknown>;
+      revision: number;
+    }>(
+      db
+        .from("lms_records")
+        .select("id,payload,revision")
+        .eq("owner_id", id)
+        .in("kind", ["payment", "student_fee", "expense"])
+        .order("id"),
+    );
+    for (const receipt of finances) {
+      const preserved = await db
+        .from("lms_records")
+        .update({
+          payload: {
+            ...receipt.payload,
+            originalRecorder: receipt.payload.originalRecorder ?? {
+              id: target.id,
+              name: target.name,
+              role: target.role,
+            },
+          },
+          revision: receipt.revision + 1,
+          updated_by: actor.id,
+        })
+        .eq("id", receipt.id)
+        .eq("revision", receipt.revision)
+        .select("id")
+        .single();
+      if (preserved.error)
+        return {
+          ok: false as const,
+          error:
+            "Financial records changed. Refresh and retry deletion; no account was deleted.",
+        };
+    }
     const moved = await db
       .from("lms_records")
       .update({ owner_id: actor.id, updated_by: actor.id })
@@ -95,8 +133,9 @@ export async function deleteAccountAction(
       error: "The account could not be deleted. Please retry.",
     };
   if (
-    target.office_id &&
-    target.avatar_url?.startsWith(`${target.office_id}/profiles/${id}/`)
+    target.avatar_url?.startsWith(`accounts/${id}/profile/`) ||
+    (target.office_id &&
+      target.avatar_url?.startsWith(`${target.office_id}/profiles/${id}/`))
   )
     await db.storage.from(MEDIA_BUCKET).remove([target.avatar_url]);
   revalidatePath("/super-admin", "layout");

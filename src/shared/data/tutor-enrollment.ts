@@ -10,9 +10,13 @@ export function enrollmentCourseIds(
   enrollment: TutorEnrollment,
   courses: { id: string; instructorId?: string }[],
 ) {
-  return enrollment.type === "tutor_assignment" && enrollment.tutorId
-    ? courses
-        .filter((course) => course.instructorId === enrollment.tutorId)
-        .map((course) => course.id)
-    : (enrollment.courseIds ?? []);
+  if (enrollment.type === "tutor_assignment") return [];
+  if (enrollment.type === "course_enrollment")
+    return (enrollment.courseIds ?? []).filter((id) =>
+      courses.some(
+        (course) =>
+          course.id === id && course.instructorId === enrollment.tutorId,
+      ),
+    );
+  return enrollment.courseIds ?? [];
 }

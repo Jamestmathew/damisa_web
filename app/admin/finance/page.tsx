@@ -1,55 +1,28 @@
-import { TrendChart } from "@/shared/charts/trend-chart";
-import { monthOf, recentMonths } from "@/shared/charts/monthly";
-import { getOfficePeople } from "@/shared/data/people";
-import { listRecords } from "@/shared/data/records";
-import type { StudentFee } from "@/shared/data/balance";
-import type { Metadata } from "next";
-
+import { getFinancialLedger } from "@/shared/finance/service";
+import { FinanceLedgerReport } from "@/shared/finance/report";
+import { AdminFinanceControls } from "@/shared/finance/admin-controls";
+import { recentMonths } from "@/shared/charts/monthly";
 import { PageHeader } from "@/shared/components";
-import { getPayments, FinanceManager } from "@/modules/admin/features/finance";
-
-export const metadata: Metadata = { title: "Finance" };
-
-export default async function FinancePage() {
-  const [payments, people, fees] = await Promise.all([
-    getPayments(),
-    getOfficePeople(),
-    listRecords<StudentFee>("student_fee"),
+export default async function FinancePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ month?: string }>;
+}) {
+  const [ledger, params] = await Promise.all([
+    getFinancialLedger(),
+    searchParams,
   ]);
-  const students = people
-    .filter((p) => p.role === "student")
-    .map((p) => ({
-      id: p.id,
-      name: p.name,
-      matricNumber: p.matric_number,
-      totalDueNaira:
-        fees.find((f) => f.studentId === p.id)?.totalDueNaira ?? null,
-    }));
-
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Finance"
-        description="Record company income here. These records are reported automatically to Super Admin."
+        description="Shared student receipts, balances and monthly expenses. Super Admin receipts appear here automatically."
       />
-      <div className="mb-6">
-        <TrendChart
-          title="Monthly recorded income"
-          description="Confirmed manual income over the last six months, by date earned"
-          format="naira"
-          points={recentMonths().map((month) => ({
-            label: month.label,
-            value: payments
-              .filter(
-                (payment) =>
-                  payment.status === "paid" &&
-                  monthOf(payment.earnedOn ?? payment.recordedAt) === month.key,
-              )
-              .reduce((sum, payment) => sum + payment.amountNaira, 0),
-          }))}
-        />
-      </div>
-      <FinanceManager students={students} payments={payments} />
+      <AdminFinanceControls students={ledger.students} />
+      <FinanceLedgerReport
+        ledger={ledger}
+        month={params.month ?? recentMonths().at(-1)!.key}
+      />
     </div>
   );
 }

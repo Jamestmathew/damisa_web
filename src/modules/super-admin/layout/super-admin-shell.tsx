@@ -7,6 +7,7 @@ import { superAdminNavConfig } from "./nav-config";
 interface SuperAdminShellProps {
   founderName: string;
   founderEmail: string;
+  compactSidebar?: boolean;
   children: React.ReactNode;
 }
 
@@ -14,9 +15,11 @@ export function SuperAdminShell({
   founderName,
   founderEmail,
   children,
+  compactSidebar = false,
 }: SuperAdminShellProps) {
   return (
     <RoleShell
+      compactSidebar={compactSidebar}
       navItems={superAdminNavConfig}
       homeHref={SUPER_ADMIN_ROUTES.dashboard}
       brandLabel="Platform HQ"

@@ -72,7 +72,7 @@ export async function createAdminCourseAction(data: FormData) {
     await invalidateRecordCache();
     revalidatePath("/admin/courses");
     revalidatePath("/tutor/courses");
-    return { ok: true as const };
+    return { ok: true as const, courseId: id };
   } catch (error) {
     if (coverPath) await removeImage(coverPath).catch(() => {});
     return {

@@ -122,7 +122,7 @@ export async function clockMyAttendanceAction(
   requestId: unknown,
 ) {
   try {
-    const user = await authorizeAction(["tutor", "admin"]);
+    const user = await authorizeAction(["student", "tutor", "admin"]);
     const action = z.enum(["check_in", "check_out"]).parse(direction);
     const request = uuid.parse(requestId);
     const { error } = await createAdminClient().rpc("attendance_self_clock", {
@@ -131,9 +131,16 @@ export async function clockMyAttendanceAction(
       p_request: request,
     });
     if (error) {
+      if (
+        user.role === "student" &&
+        error.message.includes("Only active Tutors")
+      )
+        throw new Error(
+          "Student attendance setup needs the latest database update.",
+        );
       if (["PGRST202", "42883"].includes(error.code))
         throw new Error(
-          "Staff clock-in setup is pending. Please ask Super Admin to finish setup.",
+          "Attendance sign-in setup is pending. Please ask Admin to finish setup.",
         );
       throw new Error(error.message);
     }

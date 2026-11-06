@@ -39,6 +39,7 @@ export async function setStudentFeeAction(data: FormData) {
     existing?.id,
   );
   revalidatePath("/admin/finance");
+  revalidatePath("/super-admin/finance");
   revalidatePath("/student/payments");
   revalidatePath("/super-admin/students");
   return { ok: true as const };

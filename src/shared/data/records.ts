@@ -75,6 +75,7 @@ const administrative: Kind[] = [
 ];
 
 function mayWrite(kind: Kind, role: Role) {
+  if (kind === "class" && role === "tutor") return true;
   if (kind === "assessment_grade") return role === "tutor";
   if (kind === "preferences") return true;
   if (kind === "submission" && role === "tutor") return true;
@@ -163,7 +164,11 @@ async function readVisibleRows<T>(kind: Kind): Promise<Row<T>[]> {
     );
   if (
     kind === "class" &&
-    rows.some((row) => payload(row).type === "tutor_assignment")
+    rows.some((row) =>
+      ["tutor_assignment", "course_enrollment"].includes(
+        String(payload(row).type),
+      ),
+    )
   ) {
     const { data: courses, error } = await createAdminClient()
       .from("lms_records")
@@ -171,10 +176,30 @@ async function readVisibleRows<T>(kind: Kind): Promise<Row<T>[]> {
       .eq("office_id", officeId)
       .eq("kind", "course");
     if (error) throw new Error("Unable to load assigned courses.");
+    const currentTutor = new Map<string, string>();
+    [...rows]
+      .sort((a, b) =>
+        (a.updated_at ?? a.created_at ?? "").localeCompare(
+          b.updated_at ?? b.created_at ?? "",
+        ),
+      )
+      .filter((row) => payload(row).type === "tutor_assignment")
+      .forEach((row) => {
+        const entry = payload(row) as TutorEnrollment;
+        for (const id of entry.studentIds ?? [])
+          currentTutor.set(id, entry.tutorId ?? "");
+      });
     rows = rows.map((row) => ({
       ...row,
       payload: {
         ...row.payload,
+        studentIds: ["course_enrollment", "tutor_assignment"].includes(
+          String(payload(row).type),
+        )
+          ? ((payload(row).studentIds as string[] | undefined) ?? []).filter(
+              (id) => currentTutor.get(id) === payload(row).tutorId,
+            )
+          : payload(row).studentIds,
         courseIds: enrollmentCourseIds(
           payload(row) as TutorEnrollment,
           (courses ?? []).map((course) => ({
@@ -312,6 +337,40 @@ export async function saveRecord<T extends object>(
     throw new Error(
       "This record changed in another session. Refresh and retry.",
     );
+  if (kind === "class" && user.role === "tutor") {
+    const enrollment = payload as TutorEnrollment;
+    if (
+      enrollment.type !== "course_enrollment" ||
+      enrollment.tutorId !== user.id ||
+      (previous &&
+        (previous.owner_id !== user.id ||
+          (previous.payload as TutorEnrollment).type !== "course_enrollment"))
+    )
+      throw new Error(
+        "You do not have permission: tutors may only manage their own course selections.",
+      );
+    if (
+      enrollment.courseIds?.length !== 1 ||
+      !(await getRecord("course", enrollment.courseIds[0]!))
+    )
+      throw new Error("Choose one of your courses.");
+    const links = await visibleRows<TutorEnrollment>("class");
+    const assigned = new Set(
+      links
+        .filter(
+          (row) =>
+            row.payload.type === "tutor_assignment" &&
+            row.payload.tutorId === user.id,
+        )
+        .flatMap((row) => row.payload.studentIds ?? []),
+    );
+    if (
+      !Array.isArray(enrollment.studentIds) ||
+      enrollment.studentIds.length > 500 ||
+      enrollment.studentIds.some((id) => !assigned.has(id))
+    )
+      throw new Error("Choose only students assigned to you by Admin.");
+  }
   // A tutor's child records must point to one of their courses, on both create and update.
   const courseId = (payload as Record<string, unknown>).courseId;
   if (courseId && !(await getRecord("course", String(courseId))))
@@ -382,6 +441,16 @@ export async function deleteRecord(kind: Kind, id: string) {
   const { user, officeId } = await getContext();
   if (!mayWrite(kind, user.role) || !(await getRecord(kind, id)))
     throw new Error("Record not found or access denied.");
+  if (kind === "class" && user.role === "tutor") {
+    const record = (await visibleRows<TutorEnrollment>(kind)).find(
+      (row) => row.id === id,
+    );
+    if (
+      record?.owner_id !== user.id ||
+      record.payload.type !== "course_enrollment"
+    )
+      throw new Error("Admin manages tutor assignments.");
+  }
   await enforceRateLimit("write", user.id, 120, 60);
   const { error } = await createAdminClient()
     .from("lms_records")

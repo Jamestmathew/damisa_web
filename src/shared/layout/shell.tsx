@@ -8,6 +8,7 @@ import { RoleFooter } from "./role-footer";
 import type { IconName, RoleNavItem } from "./types";
 
 interface RoleShellProps {
+  compactSidebar?: boolean;
   navItems: RoleNavItem[];
   homeHref: string;
   brandLabel: string;
@@ -19,6 +20,7 @@ interface RoleShellProps {
 }
 
 export function RoleShell({
+  compactSidebar = false,
   navItems,
   homeHref,
   brandLabel,
@@ -28,7 +30,7 @@ export function RoleShell({
   logoutAction,
   children,
 }: RoleShellProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(compactSidebar);
 
   return (
     <div className="flex min-h-screen bg-background">

@@ -1,4 +1,4 @@
-import { getPreferences } from "@/modules/student/features/settings/services/settings.service";
+import { getAccountAppearance } from "@/shared/account/appearance.service";
 import { ApplyAppearance } from "@/shared/layout/appearance";
 import { requireRole } from "@/shared/rbac";
 import { StudentShell } from "@/modules/student/layout";
@@ -10,16 +10,16 @@ export default async function StudentLayout({
 }) {
   const session = await requireRole(["student"]);
 
-  const preferences = await getPreferences();
+  const appearance = await getAccountAppearance();
 
   return (
     <StudentShell
-      key={String(preferences.appearance.compactSidebar)}
-      compactSidebar={preferences.appearance.compactSidebar}
+      key={String(appearance.compactSidebar)}
+      compactSidebar={appearance.compactSidebar}
       studentName={session.name}
       studentEmail={session.matricNumber ?? ""}
     >
-      <ApplyAppearance preferences={preferences.appearance} />
+      <ApplyAppearance preferences={appearance} />
       {children}
     </StudentShell>
   );

@@ -48,5 +48,9 @@ export async function createCourseAction(
   }
 
   revalidatePath("/", "layout");
-  redirect(TUTOR_ROUTES.courseBuilder(result.course.id));
+  redirect(
+    formData.get("afterCreate") === "dashboard"
+      ? TUTOR_ROUTES.dashboard
+      : TUTOR_ROUTES.courseBuilder(result.course.id),
+  );
 }

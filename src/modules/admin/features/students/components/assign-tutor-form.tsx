@@ -19,8 +19,8 @@ export function AssignTutorForm({
     <section className="mb-6 space-y-4 rounded-lg border bg-card p-5">
       <h2 className="font-semibold">Assign students to tutors</h2>
       <p className="text-sm text-muted-foreground">
-        Assigned students receive their tutor’s current and future published
-        courses. Draft courses remain private.
+        The tutor will choose the courses each assigned student needs. Draft
+        courses remain private.
       </p>
       <form
         className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]"

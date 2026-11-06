@@ -20,8 +20,8 @@ export function StaffSelfClock({
         setMessage(
           result.ok
             ? direction === "check_in"
-              ? "Clocked in."
-              : "Clocked out."
+              ? "Attendance signed in."
+              : "Attendance signed out."
             : result.error,
         );
       } catch {
@@ -31,10 +31,10 @@ export function StaffSelfClock({
   }
   return (
     <div className="rounded-lg border p-4 space-y-3">
-      <h2 className="font-semibold">My clock-in / clock-out</h2>
+      <h2 className="font-semibold">Attendance sign in / sign out</h2>
       <p className="text-sm text-muted-foreground">
         Your current arrival or departure time is recorded automatically. You
-        cannot backdate or edit it. Contact Super Admin if a correction or
+        cannot backdate or edit it. Contact your supervisor if a correction or
         excuse is needed.
       </p>
       <div className="flex gap-3">
@@ -42,14 +42,14 @@ export function StaffSelfClock({
           disabled={pending || checkedIn}
           onClick={() => clock("check_in")}
         >
-          {pending ? "Saving…" : checkedIn ? "Clocked in" : "Clock in now"}
+          {pending ? "Saving…" : checkedIn ? "Signed in" : "Sign in"}
         </Button>
         <Button
           variant="outline"
           disabled={pending || !checkedIn || checkedOut}
           onClick={() => clock("check_out")}
         >
-          {checkedOut ? "Clocked out" : "Clock out now"}
+          {checkedOut ? "Signed out" : "Sign out"}
         </Button>
       </div>
       {message ? (

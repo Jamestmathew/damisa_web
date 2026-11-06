@@ -1,3 +1,4 @@
+import { CourseMaterials } from "@/shared/course-materials/panel";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -15,7 +16,9 @@ interface CourseDetailsPageProps {
   params: Promise<{ courseId: string }>;
 }
 
-export default async function CourseDetailsPage({ params }: CourseDetailsPageProps) {
+export default async function CourseDetailsPage({
+  params,
+}: CourseDetailsPageProps) {
   const { courseId } = await params;
   const course = await getCourseById(courseId);
 
@@ -33,8 +36,11 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
         <CourseProgressBar percent={course.progressPercent} />
       </div>
 
-      <p className="max-w-2xl text-sm text-muted-foreground">{course.description}</p>
+      <p className="max-w-2xl text-sm text-muted-foreground">
+        {course.description}
+      </p>
 
+      <CourseMaterials courseId={course.id} />
       <CourseModulesList courseId={course.id} modules={course.modules} />
     </div>
   );

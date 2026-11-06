@@ -29,6 +29,7 @@ export function CreateCourseForm({
 }: {
   course?: CreateCourseSchema & { id: string };
 }) {
+  const [afterCreate, setAfterCreate] = useState("course");
   const [isPending, startTransition] = useTransition();
   const [state, setState] = useState<CourseBuilderActionResult | null>(null);
 
@@ -47,6 +48,7 @@ export function CreateCourseForm({
     startTransition(async () => {
       const formData = new FormData();
       formData.set("title", values.title);
+      formData.set("afterCreate", afterCreate);
       formData.set("code", values.code);
       formData.set("description", values.description);
       formData.set("creditUnits", String(values.creditUnits));
@@ -137,6 +139,21 @@ export function CreateCourseForm({
           )}
         />
 
+        {!course && (
+          <label className="block text-sm">
+            After creating
+            <select
+              value={afterCreate}
+              onChange={(e) => setAfterCreate(e.target.value)}
+              className="mt-1 h-10 w-full rounded-md border bg-background px-3"
+            >
+              <option value="course">
+                Open the draft course to build and upload files
+              </option>
+              <option value="dashboard">Go to dashboard</option>
+            </select>
+          </label>
+        )}
         <LoadingButton
           type="submit"
           isLoading={isPending}

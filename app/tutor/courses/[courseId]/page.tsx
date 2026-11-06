@@ -1,3 +1,5 @@
+import { CourseStudents } from "@/shared/course-materials/course-students";
+import { CourseMaterials } from "@/shared/course-materials/panel";
 import { CreateCourseForm } from "@/modules/tutor/features/course-builder/components/create-course-form";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -61,6 +63,8 @@ export default async function CourseBuilderPage({
           <CreateCourseForm course={course} />
         </div>
       </details>
+      <CourseStudents courseId={course.id} />
+      <CourseMaterials courseId={course.id} editable />
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">

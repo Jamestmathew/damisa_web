@@ -125,17 +125,17 @@ export function RecordPaymentDialog({
           ) : (
             <>
               <Plus className="size-4" />
-              Record income
+              Record receipt
             </>
           )}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Record company income</DialogTitle>
+          <DialogTitle>Record income or student payment</DialogTitle>
           <DialogDescription>
-            Enter the amount earned by a company. This is a manual income
-            record.
+            Allocate fee payments to a student. Only use unallocated company
+            income for other receipts; do not record the same money twice.
           </DialogDescription>
         </DialogHeader>
 
@@ -154,7 +154,9 @@ export function RecordPaymentDialog({
               name="studentId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Student payment (optional)</FormLabel>
+                  <FormLabel>
+                    Allocate to student (required for fee payments)
+                  </FormLabel>
                   <FormControl>
                     <select
                       {...field}

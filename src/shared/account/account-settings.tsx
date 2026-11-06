@@ -1,3 +1,4 @@
+import { AppearanceSettings } from "./appearance-settings";
 import { AccountNameForm } from "./account-name-form";
 import { ProfilePictureForm } from "./profile-picture-form";
 import { ChangePasswordForm } from "@/modules/auth";
@@ -8,11 +9,16 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-export function AccountSettings({ showName = true }: { showName?: boolean }) {
+export async function AccountSettings({
+  showName = true,
+}: {
+  showName?: boolean;
+}) {
   return (
     <>
       <ProfilePictureForm />
       {showName && <AccountNameForm />}
+      <AppearanceSettings />
       <Card id="password">
         <CardHeader>
           <CardTitle className="text-base">Change password</CardTitle>

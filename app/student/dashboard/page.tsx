@@ -36,7 +36,7 @@ export default async function DashboardPage() {
           <p className="text-sm text-muted-foreground">Your assigned tutor</p>
           <p className="font-semibold">{e.tutorName}</p>
           <p className="text-sm text-muted-foreground">
-            Published courses from your tutor appear in Courses.
+            Courses selected for you by your tutor appear after publication.
           </p>
         </div>
       ))}

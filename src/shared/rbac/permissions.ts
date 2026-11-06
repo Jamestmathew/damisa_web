@@ -4,6 +4,7 @@ import type { Permission, Role } from "./types";
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   student: [
     "attendance:view_self",
+    "attendance:clock_self",
     "students:view_profile",
     "payments:view_own",
     "ai:chat",

@@ -48,9 +48,11 @@ export async function recordPaymentAction(
     if (!result.ok) return { ok: false, error: result.error };
 
     revalidatePath(ADMIN_ROUTES.finance);
+    revalidatePath("/super-admin/finance");
+    revalidatePath("/super-admin/dashboard");
     revalidatePath("/student/payments");
     revalidatePath("/super-admin/students");
-    return { ok: true, message: "Company income recorded." };
+    return { ok: true, message: "Receipt recorded." };
   } catch {
     return { ok: false, error: "Something went wrong. Please try again." };
   }

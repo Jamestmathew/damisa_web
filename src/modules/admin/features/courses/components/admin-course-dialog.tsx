@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ export function AdminCourseDialog({
 }: {
   tutors: { id: string; name: string }[];
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false),
     [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
@@ -29,8 +31,8 @@ export function AdminCourseDialog({
         <DialogHeader>
           <DialogTitle>Create course</DialogTitle>
           <DialogDescription>
-            Assign a tutor to manage the course and optionally add a cover
-            picture.
+            Save the course, then upload PDFs and course files on its page.
+            Cover pictures are optional and separate.
           </DialogDescription>
         </DialogHeader>
         <form
@@ -40,8 +42,15 @@ export function AdminCourseDialog({
               setError("");
               try {
                 const result = await createAdminCourseAction(data);
-                if (result.ok) setOpen(false);
-                else setError(result.error);
+                if (result.ok) {
+                  setOpen(false);
+                  router.push(
+                    data.get("afterCreate") === "dashboard"
+                      ? "/admin/dashboard"
+                      : `/admin/courses/${result.courseId}`,
+                  );
+                  router.refresh();
+                } else setError(result.error);
               } catch {
                 setError("Unable to save. Check your connection and retry.");
               }
@@ -87,7 +96,7 @@ export function AdminCourseDialog({
           </label>
           {!tutors.length && (
             <p className="text-sm">
-              Create an active Tutor account under Users first.
+              Create an active Tutor account under Staff first.
             </p>
           )}
           <label className="block text-sm">
@@ -111,6 +120,18 @@ export function AdminCourseDialog({
           <p className="text-xs text-muted-foreground">
             PNG, JPEG, or WebP; maximum 3 MB.
           </p>
+          <label className="block text-sm">
+            After creating
+            <select
+              name="afterCreate"
+              className="h-10 w-full rounded-md border bg-background px-3"
+            >
+              <option value="course">
+                Open the created course to upload files
+              </option>
+              <option value="dashboard">Go to dashboard</option>
+            </select>
+          </label>
           {error && (
             <p role="alert" className="text-sm text-destructive">
               {error}
